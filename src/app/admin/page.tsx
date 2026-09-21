@@ -565,282 +565,238 @@ export default function AdminDashboard() {
         )}
 
         {/* ============================================================ */}
-        {/* SEKME 3: ENTEGRE PLAYBOOK & OPERASYONEL REHBER */}
+        {/* SEKME 3: DÜZENLİ YÖNETİCİ PLAYBOOK'U & REHBERİM */}
         {/* ============================================================ */}
         {activeAdminTab === 'playbook' && (
           <div className="space-y-8 max-w-5xl mx-auto">
-            {/* Playbook Başlık Kutusu */}
-            <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 border border-slate-800 space-y-3">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-semibold">
-                <BookOpen className="w-3.5 h-3.5" />
-                <span>Tek Başvuru Kaynağın</span>
+            {/* Üst Özet Kartı */}
+            <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 border border-slate-800 space-y-4 shadow-xl">
+              <div className="flex items-center justify-between">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-semibold">
+                  <BookOpen className="w-3.5 h-3.5" />
+                  <span>Sade & Düzenli Yönetici Rehberi</span>
+                </div>
+                <span className="text-xs text-slate-500 font-mono">Versiyon 2.0 (Hap Bilgiler)</span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
-                StackCost Operasyonel Playbook & Yol Haritası
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                StackCost Operasyonel Playbook
               </h2>
-              <p className="text-sm text-slate-400 leading-relaxed">
-                Bu sistemin nasıl para kazandırdığını, yabancı müşterileri nereden bulacağımızı ve senin tek tek yapman gereken basit adımları buradan takip edebilirsin.
+              <p className="text-sm text-slate-400 leading-relaxed max-w-3xl">
+                Karmaşık teknik detaylar kaldırıldı. Projenin nasıl para kazandırdığı, senin 4 basit görevin ve ziyaretçi çekme planımız aşağıda net tablolar halinde özetlenmiştir.
               </p>
             </div>
 
-            {/* Bölüm 1: 4 Adımda Para Kazanma Mantığı */}
-            <div className="p-6 sm:p-8 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-6">
-              <div className="flex items-center gap-2.5 border-b border-slate-800 pb-4">
-                <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 font-bold">
-                  1
-                </div>
-                <h3 className="text-lg font-bold text-white">
-                  Bu Sistemden Nasıl Para Kazanıyoruz? (Bakkal Hesabı)
-                </h3>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
-                  <span className="text-xs font-bold text-emerald-400 block">Adım 1: Ziyaretçi</span>
-                  <p className="text-xs text-slate-300 leading-relaxed">
-                    Amerika&apos;da OpenAI veya AWS&apos;e ayda 1.000$ ödeyen bir girişimci maliyeti düşürmek için sitemize girer.
+            {/* 1. Kutu: 3 Cümlede Sistem Özeti */}
+            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                <span>1. Sistemin Mantığı (3 Cümlede)</span>
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1.5">
+                  <span className="font-bold text-emerald-400 block">Ne Kurduk?</span>
+                  <p className="text-slate-300 leading-relaxed">
+                    Amerikalıların yapay zeka (OpenAI) ve sunucu (AWS) masraflarını hesaplayıp tasarruf ettiği ücretsiz bir B2B aracı kurduk.
                   </p>
                 </div>
-
-                <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
-                  <span className="text-xs font-bold text-emerald-400 block">Adım 2: Hesaplama</span>
-                  <p className="text-xs text-slate-300 leading-relaxed">
-                    Sitemizde kaydırıcıları oynatır. Sistemimiz ona: &quot;AWS&apos;e 1.000$ verme, DigitalOcean&apos;da 400$&apos;a çöz ve 200$ hediye kredi al&quot; der.
+                <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1.5">
+                  <span className="font-bold text-teal-400 block">Nasıl Para Kazanıyoruz?</span>
+                  <p className="text-slate-300 leading-relaxed">
+                    Ziyaretçi &quot;AWS yerine DigitalOcean kullan, 200$ hediye al&quot; butonuna basar. Butonda senin referans linkin vardır.
                   </p>
                 </div>
-
-                <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
-                  <span className="text-xs font-bold text-emerald-400 block">Adım 3: Butona Tıklar</span>
-                  <p className="text-xs text-slate-300 leading-relaxed">
-                    Girişimci yeşil butona tıklar. O butonun arkasında <strong className="text-white">senin referans linkin</strong> gömülüdür.
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
-                  <span className="text-xs font-bold text-emerald-400 block">Adım 4: Komisyon</span>
-                  <p className="text-xs text-slate-300 leading-relaxed">
-                    Dev şirket sana müşteri başına <strong className="text-emerald-400">25$ – 100$ nakit</strong> öder. Ay sonunda doğrudan banka IBAN&apos;ına yatar.
+                <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1.5">
+                  <span className="font-bold text-sky-400 block">Sen Ne Alırsın?</span>
+                  <p className="text-slate-300 leading-relaxed">
+                    Şirketler sana müşteri başına 25$ – 100$ nakit komisyon öder. Ay sonunda doğrudan banka IBAN&apos;ına yatar.
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Bölüm 2: Amerikalıları Nereden Bulacağız? */}
-            <div className="p-6 sm:p-8 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-6">
-              <div className="flex items-center gap-2.5 border-b border-slate-800 pb-4">
-                <div className="w-8 h-8 rounded-lg bg-teal-500/10 flex items-center justify-center text-teal-400 font-bold">
-                  2
-                </div>
-                <h3 className="text-lg font-bold text-white">
-                  Amerikalıları Sitemize Nereden Çekeceğiz? (3 Taktik)
+            {/* 2. Kutu: Senin Yapacağın 4 Basit Adım (Interaktif Checklist) */}
+            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                  <span>2. Senin Yapacağın 4 Basit Adım (Sırayla)</span>
                 </h3>
-              </div>
-
-              <div className="space-y-4">
-                <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="space-y-1">
-                    <span className="text-xs font-bold text-emerald-400">Taktik 1: Hazır Geliştirici Dizinleri (İlk Hafta)</span>
-                    <p className="text-xs text-slate-300">
-                      ProductHunt, There&apos;s An AI For That (3M ziyaretçi), Toolify.ai. Sitemizi buralara kaydedip ilk günden itibaren organik ABD trafiği alacağız.
-                    </p>
-                  </div>
-                  <span className="text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-full border border-emerald-500/20 shrink-0">
-                    Hızlı Trafik
-                  </span>
-                </div>
-
-                <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="space-y-1">
-                    <span className="text-xs font-bold text-teal-400">Taktik 2: Reddit Toplulukları (Altın Madeni)</span>
-                    <p className="text-xs text-slate-300">
-                      r/SaaS ve r/LocalLLaMA gruplarında &quot;DeepSeek ve GPT-4o maliyet tasarrufu hesaplayıcısı yaptık&quot; şeklinde değer odaklı paylaşımla binlerce ziyaretçi akıtacağız.
-                    </p>
-                  </div>
-                  <span className="text-[11px] font-semibold bg-teal-500/10 text-teal-400 px-2.5 py-1 rounded-full border border-teal-500/20 shrink-0">
-                    En Yüksek Dönüşüm
-                  </span>
-                </div>
-
-                <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="space-y-1">
-                    <span className="text-xs font-bold text-sky-400">Taktik 3: Google Uzun Kuyruk Aramaları (Kalıcı Pasif)</span>
-                    <p className="text-xs text-slate-300">
-                      &quot;AWS vs DigitalOcean price difference&quot; gibi dert arayan Amerikalılar için sitenin tüm SEO altyapısını anahtar teslim hazırladık.
-                    </p>
-                  </div>
-                  <span className="text-[11px] font-semibold bg-sky-500/10 text-sky-400 px-2.5 py-1 rounded-full border border-sky-500/20 shrink-0">
-                    Ömür Boyu Pasif
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Bölüm 3: Veri = Para ve Otonom Büyüme Döngüsü */}
-            <div className="p-6 sm:p-8 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-6">
-              <div className="flex items-center gap-2.5 border-b border-slate-800 pb-4">
-                <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400 font-bold">
-                  3
-                </div>
-                <h3 className="text-lg font-bold text-white">
-                  Veri = Para: Derin Telemetri ve Otonom Geliştirme Döngüsü
-                </h3>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
-                  <span className="text-xs font-bold text-emerald-400 block">1. Kalıcı Veri Tabanı (telemetry_db.json)</span>
-                  <p className="text-xs text-slate-300 leading-relaxed">
-                    Sitede yapılan her hesaplama, tasarruf miktarı, kopyalanan bütçeler ve tıklanan partner linkleri disk üzerinde kalıcı olarak saklanır. Sunucu kapansa dahi hiçbir veri kaybolmaz.
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
-                  <span className="text-xs font-bold text-teal-400 block">2. Model Göçleri & Kullanıcı Niyeti</span>
-                  <p className="text-xs text-slate-300 leading-relaxed">
-                    Kullanıcıların hangi pahalı modelden kaçıp hangi ucuz alternatife geçmek istediğini yakalarız. Bu veri, Reddit ve Twitter&apos;da tam o konu üzerine odaklanmamızı sağlar.
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
-                  <span className="text-xs font-bold text-sky-400 block">3. Otonom Geri Besleme Döngüsü</span>
-                  <p className="text-xs text-slate-300 leading-relaxed">
-                    Bana ileride &quot;Verileri incele ve bana bu haftanın aksiyon planını çıkar&quot; dediğinde ben doğrudan bu veri havuzunu okuyup sana kanıtlanmış büyüme stratejisi sunarım.
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
-                  <span className="text-xs font-bold text-purple-400 block">4. Dönüşüm Hunisi (Funnel) Takibi</span>
-                  <p className="text-xs text-slate-300 leading-relaxed">
-                    Ziyaretçiden komisyona giden yolda nerede kayıp yaşadığımızı görerek arayüzü ve butonları en yüksek kâr getirecek şekilde anında güncelleriz.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Bölüm 4: Senin Yapman Gerekenler (Canlı Kontrol Listesi) */}
-            <div className="p-6 sm:p-8 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-6">
-              <div className="flex items-center gap-2.5 border-b border-slate-800 pb-4">
-                <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 font-bold">
-                  4
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-white">
-                    Senin Yapman Gereken Basit Adımlar
-                  </h3>
-                  <span className="text-xs text-slate-400">Tamamladıkça kutucuklara tıklayıp işaretleyebilirsin</span>
-                </div>
+                <span className="text-xs text-slate-500">Tamamladıkça tıkla</span>
               </div>
 
               <div className="space-y-3">
                 <div 
                   onClick={() => toggleChecklist('domain')}
-                  className={`p-4 rounded-xl border cursor-pointer transition-all flex items-start gap-3.5 ${
+                  className={`p-4 rounded-xl border cursor-pointer transition-all flex items-center justify-between ${
                     checklist.domain 
                       ? 'bg-emerald-950/20 border-emerald-500/60 text-slate-200' 
                       : 'bg-slate-950/70 border-slate-800 hover:border-slate-700'
                   }`}
                 >
-                  <div className={`mt-0.5 w-5 h-5 rounded-md flex items-center justify-center border transition-colors ${
-                    checklist.domain ? 'bg-emerald-500 border-emerald-500 text-slate-950' : 'border-slate-700 bg-slate-900'
-                  }`}>
-                    {checklist.domain && <CheckCircle2 className="w-4 h-4" />}
+                  <div className="flex items-center gap-3.5">
+                    <div className={`w-5 h-5 rounded-md flex items-center justify-center border transition-colors ${
+                      checklist.domain ? 'bg-emerald-500 border-emerald-500 text-slate-950' : 'border-slate-700 bg-slate-900'
+                    }`}>
+                      {checklist.domain && <CheckCircle2 className="w-4 h-4" />}
+                    </div>
+                    <div>
+                      <span className="text-sm font-bold text-white">Adım 1: Alan Adı (Domain) Satın Alımı</span>
+                      <span className="text-xs text-slate-400 block">Namecheap veya Porkbun üzerinden ~10$&apos;a alan adı al. (Örn: stackcost.co)</span>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-sm font-bold text-white block">1. Domain Satın Alımı (~10$)</span>
-                    <p className="text-xs text-slate-400 mt-0.5">
-                      Namecheap veya Porkbun üzerinden önerilen <code className="text-emerald-400 font-mono">stackcost.co</code> veya <code className="text-emerald-400 font-mono">infracalc.com</code> gibi bir alan adını satın almak.
-                    </p>
-                  </div>
+                  <span className="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20 shrink-0">
+                    Süre: 3 dk
+                  </span>
                 </div>
 
                 <div 
                   onClick={() => toggleChecklist('github')}
-                  className={`p-4 rounded-xl border cursor-pointer transition-all flex items-start gap-3.5 ${
+                  className={`p-4 rounded-xl border cursor-pointer transition-all flex items-center justify-between ${
                     checklist.github 
                       ? 'bg-emerald-950/20 border-emerald-500/60 text-slate-200' 
                       : 'bg-slate-950/70 border-slate-800 hover:border-slate-700'
                   }`}
                 >
-                  <div className={`mt-0.5 w-5 h-5 rounded-md flex items-center justify-center border transition-colors ${
-                    checklist.github ? 'bg-emerald-500 border-emerald-500 text-slate-950' : 'border-slate-700 bg-slate-900'
-                  }`}>
-                    {checklist.github && <CheckCircle2 className="w-4 h-4" />}
+                  <div className="flex items-center gap-3.5">
+                    <div className={`w-5 h-5 rounded-md flex items-center justify-center border transition-colors ${
+                      checklist.github ? 'bg-emerald-500 border-emerald-500 text-slate-950' : 'border-slate-700 bg-slate-900'
+                    }`}>
+                      {checklist.github && <CheckCircle2 className="w-4 h-4" />}
+                    </div>
+                    <div>
+                      <span className="text-sm font-bold text-white">Adım 2: Ücretsiz GitHub & Vercel Açılışı</span>
+                      <span className="text-xs text-slate-400 block">github.com ve vercel.com üyeliklerini aç. Kodları 1 tıkla yayına alacağız.</span>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-sm font-bold text-white block">2. Ücretsiz GitHub Hesabı Açmak</span>
-                    <p className="text-xs text-slate-400 mt-0.5">
-                      github.com üzerinden ücretsiz bir hesap açmak (Hazırladığım kodları tek tıkla buraya aktaracağız).
-                    </p>
-                  </div>
-                </div>
-
-                <div 
-                  onClick={() => toggleChecklist('vercel')}
-                  className={`p-4 rounded-xl border cursor-pointer transition-all flex items-start gap-3.5 ${
-                    checklist.vercel 
-                      ? 'bg-emerald-950/20 border-emerald-500/60 text-slate-200' 
-                      : 'bg-slate-950/70 border-slate-800 hover:border-slate-700'
-                  }`}
-                >
-                  <div className={`mt-0.5 w-5 h-5 rounded-md flex items-center justify-center border transition-colors ${
-                    checklist.vercel ? 'bg-emerald-500 border-emerald-500 text-slate-950' : 'border-slate-700 bg-slate-900'
-                  }`}>
-                    {checklist.vercel && <CheckCircle2 className="w-4 h-4" />}
-                  </div>
-                  <div>
-                    <span className="text-sm font-bold text-white block">3. Ücretsiz Vercel Hesabı Açmak</span>
-                    <p className="text-xs text-slate-400 mt-0.5">
-                      vercel.com adresine gidip &quot;Continue with GitHub&quot; ile üye olmak. Sitemiz burada <strong className="text-emerald-400">0 TL sunucu maliyetiyle</strong> ömür boyu çalışacak.
-                    </p>
-                  </div>
+                  <span className="text-xs font-mono text-teal-400 bg-teal-500/10 px-2.5 py-1 rounded-lg border border-teal-500/20 shrink-0">
+                    Süre: 2 dk
+                  </span>
                 </div>
 
                 <div 
                   onClick={() => toggleChecklist('affiliates')}
-                  className={`p-4 rounded-xl border cursor-pointer transition-all flex items-start gap-3.5 ${
+                  className={`p-4 rounded-xl border cursor-pointer transition-all flex items-center justify-between ${
                     checklist.affiliates 
                       ? 'bg-emerald-950/20 border-emerald-500/60 text-slate-200' 
                       : 'bg-slate-950/70 border-slate-800 hover:border-slate-700'
                   }`}
                 >
-                  <div className={`mt-0.5 w-5 h-5 rounded-md flex items-center justify-center border transition-colors ${
-                    checklist.affiliates ? 'bg-emerald-500 border-emerald-500 text-slate-950' : 'border-slate-700 bg-slate-900'
-                  }`}>
-                    {checklist.affiliates && <CheckCircle2 className="w-4 h-4" />}
+                  <div className="flex items-center gap-3.5">
+                    <div className={`w-5 h-5 rounded-md flex items-center justify-center border transition-colors ${
+                      checklist.affiliates ? 'bg-emerald-500 border-emerald-500 text-slate-950' : 'border-slate-700 bg-slate-900'
+                    }`}>
+                      {checklist.affiliates && <CheckCircle2 className="w-4 h-4" />}
+                    </div>
+                    <div>
+                      <span className="text-sm font-bold text-white">Adım 3: Komisyon Hesaplarını Açmak (IBAN Bağlama)</span>
+                      <span className="text-xs text-slate-400 block">DigitalOcean, Vultr ve Together AI referans linklerini alıp bana ver.</span>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-sm font-bold text-white block">4. Komisyon Hesaplarını Açmak (IBAN Bağlama)</span>
-                    <p className="text-xs text-slate-400 mt-0.5">
-                      DigitalOcean, Vultr ve Together AI referans programlarına kaydolup linklerini bana vermek. Paranın yatacağı yer senin resmi banka hesabın olacak.
-                    </p>
+                  <span className="text-xs font-mono text-sky-400 bg-sky-500/10 px-2.5 py-1 rounded-lg border border-sky-500/20 shrink-0">
+                    Süre: 10 dk
+                  </span>
+                </div>
+
+                <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 flex items-center justify-between">
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-5 h-5 rounded-md flex items-center justify-center border border-slate-700 bg-slate-900 text-emerald-400">
+                      <Clock className="w-3.5 h-3.5" />
+                    </div>
+                    <div>
+                      <span className="text-sm font-bold text-white">Adım 4: Haftalık 5 Dk Gelir Kontrolü</span>
+                      <span className="text-xs text-slate-400 block">Bu panele ve banka hesabına girip biriken Dolar komisyonunu kontrol et.</span>
+                    </div>
                   </div>
+                  <span className="text-xs font-mono text-purple-400 bg-purple-500/10 px-2.5 py-1 rounded-lg border border-purple-500/20 shrink-0">
+                    5 dk / hf
+                  </span>
                 </div>
               </div>
             </div>
 
-            {/* Bölüm 4: Önerilen Alan Adları */}
-            <div className="p-6 sm:p-8 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
-              <div className="flex items-center gap-2.5 border-b border-slate-800 pb-4">
-                <Globe className="w-5 h-5 text-emerald-400" />
-                <h3 className="text-lg font-bold text-white">Önerilen Domainler & Maliyet</h3>
+            {/* 3. Kutu: Amerikalıları Nereden Getireceğiz? */}
+            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                <span>3. Ziyaretçi Çekme Planı (3 Aşama)</span>
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1">
+                  <span className="font-bold text-emerald-400 block">1. Hafta: Hazır Dizinler</span>
+                  <p className="text-slate-300">ProductHunt ve Toolify gibi dev dizinlere kaydedeceğiz. İlk 200–500 kişi bedava gelecek.</p>
+                </div>
+                <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1">
+                  <span className="font-bold text-teal-400 block">1. Ay: Reddit Toplulukları</span>
+                  <p className="text-slate-300">r/SaaS ve r/LocalLLaMA gruplarında tasarruf analizleri paylaşarak binlerce yazılımcı çekeceğiz.</p>
+                </div>
+                <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1">
+                  <span className="font-bold text-sky-400 block">Kalıcı: Google Aramaları</span>
+                  <p className="text-slate-300">&quot;AWS vs DigitalOcean price&quot; arayan Amerikalılar Google&apos;dan doğrudan sitemize akacak.</p>
+                </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1">
-                  <span className="text-sm font-mono font-bold text-emerald-400">stackcost.co</span>
-                  <p className="text-xs text-slate-400">En güçlü B2B algısı. Yazılımcıların en güvendiği uzantılardan biri.</p>
-                  <span className="text-[11px] text-slate-500 block">Yıllık ~10$</span>
-                </div>
+            </div>
 
-                <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1">
-                  <span className="text-sm font-mono font-bold text-teal-400">infracalc.com</span>
-                  <p className="text-xs text-slate-400">Infrastructure Calculator kısaltması. Kurumsal teknoloji algısı verir.</p>
-                  <span className="text-[11px] text-slate-500 block">Yıllık ~10$</span>
-                </div>
+            {/* 4. Kutu: Gerçekçi Gelir Tablosu */}
+            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                <span>4. Gerçekçi Gelir Tablosu</span>
+              </h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs text-left">
+                  <thead className="bg-slate-950/80 text-slate-400 uppercase font-mono border-b border-slate-800">
+                    <tr>
+                      <th className="p-3">Günlük Ziyaretçi</th>
+                      <th className="p-3">Kaydolan Kişi</th>
+                      <th className="p-3">Komisyon</th>
+                      <th className="p-3 text-emerald-400">Aylık Tahmini Net Gelir</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/60 font-medium">
+                    <tr className="hover:bg-slate-950/40">
+                      <td className="p-3 text-white">30 – 50 Kişi</td>
+                      <td className="p-3 text-slate-300">Günde 1 Kişi</td>
+                      <td className="p-3 font-mono">50$</td>
+                      <td className="p-3 font-mono font-bold text-emerald-400">1.500$ (~55.000 TL)</td>
+                    </tr>
+                    <tr className="hover:bg-slate-950/40">
+                      <td className="p-3 text-white">100 Kişi</td>
+                      <td className="p-3 text-slate-300">Günde 2 Kişi</td>
+                      <td className="p-3 font-mono">50$</td>
+                      <td className="p-3 font-mono font-bold text-emerald-400">3.000$ (~110.000 TL)</td>
+                    </tr>
+                    <tr className="hover:bg-slate-950/40">
+                      <td className="p-3 text-white">200+ Kişi</td>
+                      <td className="p-3 text-slate-300">Günde 4–5 Kişi</td>
+                      <td className="p-3 font-mono">50$</td>
+                      <td className="p-3 font-mono font-bold text-emerald-400">6.000$ – 7.500$ (200.000+ TL)</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
 
-                <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1">
-                  <span className="text-sm font-mono font-bold text-sky-400">cloudsaver.tech</span>
-                  <p className="text-xs text-slate-400">Doğrudan tasarruf arayan KOBİ ve girişimler için ideal isim.</p>
-                  <span className="text-[11px] text-slate-500 block">Yıllık ~8$</span>
+            {/* 5. Kutu: Önerilen Alan Adları */}
+            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-3">
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                <Globe className="w-4 h-4 text-emerald-400" />
+                <span>5. Önerilen Alan Adları & Maliyetleri</span>
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                <div className="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800">
+                  <span className="font-mono font-bold text-emerald-400 text-sm">stackcost.co</span>
+                  <span className="text-slate-400 block mt-0.5">En çok önerilen, modern B2B yazılım algısı</span>
+                  <span className="text-[11px] text-slate-500 font-mono mt-1 block">Yıllık ~10$</span>
+                </div>
+                <div className="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800">
+                  <span className="font-mono font-bold text-teal-400 text-sm">infracalc.com</span>
+                  <span className="text-slate-400 block mt-0.5">Altyapı hesaplayıcısı kurumsal algı</span>
+                  <span className="text-[11px] text-slate-500 font-mono mt-1 block">Yıllık ~10$</span>
+                </div>
+                <div className="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800">
+                  <span className="font-mono font-bold text-sky-400 text-sm">cloudsaver.tech</span>
+                  <span className="text-slate-400 block mt-0.5">Doğrudan tasarruf odaklı alternatif</span>
+                  <span className="text-[11px] text-slate-500 font-mono mt-1 block">Yıllık ~8$</span>
                 </div>
               </div>
             </div>
