@@ -25,7 +25,12 @@ import {
   Check,
   Zap,
   ArrowRight,
-  PieChart
+  ClipboardList,
+  ShieldAlert,
+  UserCheck,
+  Bot,
+  PlusCircle,
+  Calendar
 } from 'lucide-react';
 
 interface TelemetryData {
@@ -63,14 +68,34 @@ interface TelemetryData {
   }>;
 }
 
+interface AuditTask {
+  id: string;
+  title: string;
+  category: string;
+  owner: 'AI' | 'USER' | 'ORTAK';
+  ownerLabel: string;
+  frequency: string;
+  status: 'done' | 'todo';
+  completedAt?: string | null;
+  description: string;
+  auditNotes: string;
+}
+
 export default function AdminDashboard() {
   const [data, setData] = useState<TelemetryData | null>(null);
+  const [tasks, setTasks] = useState<AuditTask[]>([]);
+  const [tasksMetrics, setTasksMetrics] = useState({ total: 0, completed: 0, pending: 0, completionRate: '0' });
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [lastRefreshed, setLastRefreshed] = useState<string>('');
-  const [activeAdminTab, setActiveAdminTab] = useState<'analytics' | 'playbook' | 'ai-data'>('analytics');
+  const [activeAdminTab, setActiveAdminTab] = useState<'analytics' | 'audit' | 'ai-data' | 'playbook'>('analytics');
   const [copiedJson, setCopiedJson] = useState<boolean>(false);
+  const [taskFilter, setTaskFilter] = useState<'all' | 'user' | 'ai' | 'todo' | 'done'>('all');
+  const [showAddTask, setShowAddTask] = useState<boolean>(false);
+  const [newTaskTitle, setNewTaskTitle] = useState<string>('');
+  const [newTaskOwner, setNewTaskOwner] = useState<'AI' | 'USER'>('USER');
+  const [newTaskFreq, setNewTaskFreq] = useState<string>('Tek Seferlik');
 
-  // Checklist state for user tasks
+  // Checklist state for simple playbook list
   const [checklist, setChecklist] = useState<Record<string, boolean>>({
     domain: false,
     github: false,
@@ -85,14 +110,23 @@ export default function AdminDashboard() {
   const fetchStats = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/telemetry');
-      if (res.ok) {
-        const json = await res.json();
+      const [telemetryRes, tasksRes] = await Promise.all([
+        fetch('/api/telemetry'),
+        fetch('/api/tasks'),
+      ]);
+
+      if (telemetryRes.ok) {
+        const json = await telemetryRes.json();
         setData(json);
-        setLastRefreshed(new Date().toLocaleTimeString('tr-TR'));
       }
+      if (tasksRes.ok) {
+        const tJson = await tasksRes.json();
+        setTasks(tJson.tasks || []);
+        setTasksMetrics(tJson.metrics || { total: 0, completed: 0, pending: 0, completionRate: '0' });
+      }
+      setLastRefreshed(new Date().toLocaleTimeString('tr-TR'));
     } catch (err) {
-      console.error('Telemetri verisi alınamadı', err);
+      console.error('Veri çekme hatası:', err);
     } finally {
       setIsLoading(false);
     }
@@ -103,6 +137,52 @@ export default function AdminDashboard() {
     const interval = setInterval(fetchStats, 15000);
     return () => clearInterval(interval);
   }, []);
+
+  const handleToggleTask = async (taskId: string) => {
+    try {
+      const res = await fetch('/api/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'toggle', taskId }),
+      });
+      if (res.ok) {
+        setTasks((prev) =>
+          prev.map((t) => (t.id === taskId ? { ...t, status: t.status === 'done' ? 'todo' : 'done' } : t))
+        );
+        fetchStats();
+      }
+    } catch (err) {
+      console.error('Görev güncelleme hatası:', err);
+    }
+  };
+
+  const handleAddNewTask = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTaskTitle.trim()) return;
+
+    try {
+      const res = await fetch('/api/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'add',
+          newTask: {
+            title: newTaskTitle,
+            owner: newTaskOwner,
+            frequency: newTaskFreq,
+            category: 'Operasyon',
+          },
+        }),
+      });
+      if (res.ok) {
+        setNewTaskTitle('');
+        setShowAddTask(false);
+        fetchStats();
+      }
+    } catch (err) {
+      console.error('Görev ekleme hatası:', err);
+    }
+  };
 
   const handleCopyAIExport = () => {
     if (!data) return;
@@ -116,6 +196,7 @@ export default function AdminDashboard() {
       trafficSources: data.referrerBreakdown,
       countries: data.countryBreakdown,
       systemRecommendations: data.strategicInsights,
+      tasksOverview: tasksMetrics,
     };
 
     navigator.clipboard.writeText(JSON.stringify(aiPayload, null, 2));
@@ -141,6 +222,14 @@ export default function AdminDashboard() {
     }
   };
 
+  const filteredTasks = tasks.filter((t) => {
+    if (taskFilter === 'user') return t.owner === 'USER' || t.owner === 'ORTAK';
+    if (taskFilter === 'ai') return t.owner === 'AI' || t.owner === 'ORTAK';
+    if (taskFilter === 'todo') return t.status === 'todo';
+    if (taskFilter === 'done') return t.status === 'done';
+    return true;
+  });
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans p-4 sm:p-6 lg:p-10">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -162,21 +251,21 @@ export default function AdminDashboard() {
                 </h1>
                 <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-semibold flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  Kalıcı Veri Tabanı Aktif
+                  İç Denetim & Takip Aktif
                 </span>
               </div>
               <p className="text-xs text-slate-400 mt-0.5">
-                Kullanıcı niyetleri, tasarruf hacimleri, model göçleri ve yapay zeka analiz motoru
+                Canlı analitik, iç denetim matrisi, yapay zeka istihbaratı ve operasyonel rehber
               </p>
             </div>
           </div>
 
-          {/* Sekme Değiştirici & Aksiyonlar */}
-          <div className="flex flex-wrap items-center gap-3">
+          {/* 4 Sekme Değiştirici */}
+          <div className="flex flex-wrap items-center gap-2">
             <div className="bg-slate-900/90 p-1 rounded-xl border border-slate-800 flex items-center gap-1">
               <button
                 onClick={() => setActiveAdminTab('analytics')}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                   activeAdminTab === 'analytics'
                     ? 'bg-emerald-500 text-slate-950 shadow-sm'
                     : 'text-slate-400 hover:text-white'
@@ -187,8 +276,23 @@ export default function AdminDashboard() {
               </button>
 
               <button
+                onClick={() => setActiveAdminTab('audit')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  activeAdminTab === 'audit'
+                    ? 'bg-emerald-500 text-slate-950 shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <ClipboardList className="w-3.5 h-3.5" />
+                <span>İç Denetim & Görevler</span>
+                <span className="ml-1 px-1.5 py-0.2 rounded-full bg-slate-800 text-[10px] text-emerald-400 font-mono">
+                  {tasksMetrics.completed}/{tasksMetrics.total}
+                </span>
+              </button>
+
+              <button
                 onClick={() => setActiveAdminTab('ai-data')}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                   activeAdminTab === 'ai-data'
                     ? 'bg-emerald-500 text-slate-950 shadow-sm'
                     : 'text-slate-400 hover:text-white'
@@ -200,14 +304,14 @@ export default function AdminDashboard() {
 
               <button
                 onClick={() => setActiveAdminTab('playbook')}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                   activeAdminTab === 'playbook'
                     ? 'bg-emerald-500 text-slate-950 shadow-sm'
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
                 <BookOpen className="w-3.5 h-3.5" />
-                <span>Playbook & Rehberim</span>
+                <span>Playbook</span>
               </button>
             </div>
 
@@ -228,7 +332,6 @@ export default function AdminDashboard() {
         {/* ============================================================ */}
         {activeAdminTab === 'analytics' && (
           <div className="space-y-8">
-            {/* 5 Büyük Gösterge Kartı */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
               <div className="p-5 rounded-2xl bg-slate-900/70 border border-slate-800/80 space-y-2">
                 <div className="flex items-center justify-between text-slate-400">
@@ -292,14 +395,13 @@ export default function AdminDashboard() {
                   ${(data?.metrics.totalSimulatedAnnualSavings || 0).toLocaleString('en-US')}
                 </div>
                 <span className="text-[11px] text-slate-400">
-                  Kullanıcıların aradığı yıllık tasarruf
+                  Aranan yıllık tasarruf
                 </span>
               </div>
             </div>
 
-            {/* Orta Kısım: Tıklanan Şirketler & Trafik Kaynakları */}
+            {/* Orta Kısım */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              {/* Partner Dağılımı */}
               <div className="lg:col-span-6 p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-5">
                 <div className="flex items-center justify-between border-b border-slate-800 pb-3">
                   <h3 className="text-sm font-bold text-white flex items-center gap-2">
@@ -333,7 +435,6 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              {/* Ziyaretçilerin Geldiği Yerler */}
               <div className="lg:col-span-6 p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-5">
                 <div className="flex items-center justify-between border-b border-slate-800 pb-3">
                   <h3 className="text-sm font-bold text-white flex items-center gap-2">
@@ -359,67 +460,253 @@ export default function AdminDashboard() {
                 </div>
               </div>
             </div>
+          </div>
+        )}
 
-            {/* Canlı Kullanıcı Hareketleri (Log Akışı) */}
-            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-slate-400" />
-                  <span>Canlı Kullanıcı Hareketleri (Son 30 Hareket)</span>
-                </h3>
-                <span className="text-xs text-slate-500">Milisaniyelik kalıcı log akışı</span>
+        {/* ============================================================ */}
+        {/* SEKME 2: İÇ DENETİM & GÖREV MATRİSİ (YENİ) */}
+        {/* ============================================================ */}
+        {activeAdminTab === 'audit' && (
+          <div className="space-y-8">
+            {/* Üst Denetim Kartı & İlerleme Çubuğu */}
+            <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 border border-slate-800 space-y-5 shadow-xl">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-semibold">
+                    <ClipboardList className="w-3.5 h-3.5" />
+                    <span>İç Denetim ve Operasyonel Görev Matrisi (Audit Log)</span>
+                  </div>
+                  <h2 className="text-2xl sm:text-3xl font-extrabold text-white mt-2">
+                    Kim Ne Yaptı? Ne Yapacak? Hiçbir Şeyi Es Geçmiyoruz
+                  </h2>
+                  <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-3xl">
+                    Bu sistem, projemizin iç denetim kayıt defteridir (<code className="text-emerald-400 font-mono">src/data/audit_tasks.json</code>). Yapay zekanın tamamladığı işler, senin adımların ve gelecekteki rutinler burada kalıcı olarak takip edilir.
+                  </p>
+                </div>
+
+                <div className="shrink-0 flex items-center gap-3">
+                  <button
+                    onClick={() => setShowAddTask(!showAddTask)}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold transition-all shadow-md shadow-emerald-500/20"
+                  >
+                    <PlusCircle className="w-4 h-4" />
+                    <span>Yeni Görev Ekle</span>
+                  </button>
+                </div>
               </div>
 
-              <div className="space-y-2 max-h-80 overflow-y-auto font-mono text-xs">
-                {data?.recentEvents && data.recentEvents.length > 0 ? (
-                  data.recentEvents.map((event) => (
-                    <div
-                      key={event.id}
-                      className="p-3 rounded-lg bg-slate-950/70 border border-slate-800/60 flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+              {/* İlerleme Çubuğu */}
+              <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-semibold text-slate-300">
+                    Genel Proje İlerlemesi (%{tasksMetrics.completionRate} Tamamlandı)
+                  </span>
+                  <span className="font-mono text-emerald-400 font-bold">
+                    {tasksMetrics.completed} Tamamlandı • {tasksMetrics.pending} Bekliyor
+                  </span>
+                </div>
+                <div className="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                  <div 
+                    className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500"
+                    style={{ width: `${tasksMetrics.completionRate}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Yeni Görev Ekleme Formu (Açılır/Kapanır) */}
+            {showAddTask && (
+              <form onSubmit={handleAddNewTask} className="p-5 rounded-2xl bg-slate-900 border border-emerald-500/40 space-y-4">
+                <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                  <PlusCircle className="w-4 h-4 text-emerald-400" />
+                  <span>Denetim Tablosuna Yeni İş / Kontrol Maddesi Ekle</span>
+                </h4>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="sm:col-span-2">
+                    <input
+                      type="text"
+                      placeholder="Görev veya kontrol başlığı..."
+                      value={newTaskTitle}
+                      onChange={(e) => setNewTaskTitle(e.target.value)}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500"
+                      required
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <select
+                      value={newTaskOwner}
+                      onChange={(e) => setNewTaskOwner(e.target.value as any)}
+                      className="w-1/2 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500"
                     >
-                      <div className="flex items-center gap-2.5">
+                      <option value="USER">Yönetici (Sen)</option>
+                      <option value="AI">Yapay Zeka</option>
+                    </select>
+
+                    <select
+                      value={newTaskFreq}
+                      onChange={(e) => setNewTaskFreq(e.target.value)}
+                      className="w-1/2 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500"
+                    >
+                      <option value="Tek Seferlik">Tek Seferlik</option>
+                      <option value="Günlük">Günlük</option>
+                      <option value="Haftalık">Haftalık</option>
+                      <option value="Aylık">Aylık</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddTask(false)}
+                    className="px-3 py-1.5 rounded-lg bg-slate-800 text-xs text-slate-400 hover:text-white"
+                  >
+                    İptal
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-1.5 rounded-lg bg-emerald-500 text-slate-950 text-xs font-bold hover:bg-emerald-400"
+                  >
+                    Kaydet
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* Filtreleme Butonları */}
+            <div className="flex flex-wrap items-center gap-2 border-b border-slate-800 pb-4">
+              <button
+                onClick={() => setTaskFilter('all')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  taskFilter === 'all' ? 'bg-slate-800 text-white border border-slate-700' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Tümü ({tasks.length})
+              </button>
+              <button
+                onClick={() => setTaskFilter('user')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                  taskFilter === 'user' ? 'bg-slate-800 text-white border border-slate-700' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <UserCheck className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Senin Görevlerin</span>
+              </button>
+              <button
+                onClick={() => setTaskFilter('ai')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                  taskFilter === 'ai' ? 'bg-slate-800 text-white border border-slate-700' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <Bot className="w-3.5 h-3.5 text-teal-400" />
+                <span>Yapay Zeka Görevleri</span>
+              </button>
+              <button
+                onClick={() => setTaskFilter('todo')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  taskFilter === 'todo' ? 'bg-slate-800 text-white border border-slate-700' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Bekleyenler ({tasksMetrics.pending})
+              </button>
+              <button
+                onClick={() => setTaskFilter('done')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  taskFilter === 'done' ? 'bg-slate-800 text-white border border-slate-700' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Tamamlananlar ({tasksMetrics.completed})
+              </button>
+            </div>
+
+            {/* Görev Kartları Listesi */}
+            <div className="space-y-3">
+              {filteredTasks.map((task) => {
+                const isDone = task.status === 'done';
+                return (
+                  <div
+                    key={task.id}
+                    className={`p-4 sm:p-5 rounded-2xl border transition-all ${
+                      isDone
+                        ? 'bg-slate-900/40 border-slate-800/80 opacity-80'
+                        : 'bg-slate-900/90 border-slate-700 shadow-md'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-start gap-3.5">
+                        {/* Tıklanabilir Checkbox */}
+                        <button
+                          onClick={() => handleToggleTask(task.id)}
+                          className={`mt-0.5 w-6 h-6 rounded-lg border flex items-center justify-center transition-all ${
+                            isDone
+                              ? 'bg-emerald-500 border-emerald-500 text-slate-950 shadow-sm shadow-emerald-500/30'
+                              : 'border-slate-700 hover:border-emerald-500 bg-slate-950 text-transparent'
+                          }`}
+                          title={isDone ? 'Bekliyor durumuna al' : 'Tamamlandı olarak işaretle'}
+                        >
+                          <Check className="w-4 h-4 font-black stroke-[3]" />
+                        </button>
+
+                        <div className="space-y-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className={`text-sm font-bold ${isDone ? 'line-through text-slate-400' : 'text-white'}`}>
+                              {task.title}
+                            </span>
+                            <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
+                              {task.category}
+                            </span>
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-950 text-slate-400 border border-slate-800 flex items-center gap-1">
+                              <Calendar className="w-3 h-3 text-slate-500" />
+                              {task.frequency}
+                            </span>
+                          </div>
+
+                          <p className="text-xs text-slate-400 leading-relaxed">
+                            {task.description}
+                          </p>
+
+                          {task.auditNotes && (
+                            <div className="pt-1 text-[11px] text-slate-500 font-mono flex items-center gap-1.5">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                              <span>Denetim Notu: {task.auditNotes}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Görev Sahibi & Durum Rozeti */}
+                      <div className="shrink-0 text-right space-y-1">
                         <span
-                          className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                            event.type === 'affiliate_click'
-                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                              : event.type === 'pageview'
-                              ? 'bg-sky-500/20 text-sky-400 border border-sky-500/30'
-                              : 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                          className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg border ${
+                            task.owner === 'AI'
+                              ? 'bg-teal-500/10 text-teal-400 border-teal-500/20'
+                              : task.owner === 'USER'
+                              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                              : 'bg-purple-500/10 text-purple-400 border-purple-500/20'
                           }`}
                         >
-                          {translateEventType(event.type)}
+                          {task.owner === 'AI' ? <Bot className="w-3 h-3" /> : <UserCheck className="w-3 h-3" />}
+                          <span>{task.ownerLabel}</span>
                         </span>
-                        <span className="text-slate-300">
-                          {event.metadata.partnerName
-                            ? `${event.metadata.partnerName} Tıklandı (${event.metadata.dealText || 'Teklif'})`
-                            : event.metadata.sourceModel
-                            ? `${event.metadata.sourceModel} → ${event.metadata.targetModel} ($${event.metadata.annualSavings?.toLocaleString('en-US') || 0}/yıl tasarruf)`
-                            : event.metadata.tier
-                            ? `${event.metadata.tier} Sunucu İncelendi`
-                            : `Sayfa Gezildi (${event.metadata.path || '/'})`}
-                        </span>
-                      </div>
 
-                      <div className="flex items-center gap-4 text-slate-500 text-[11px]">
-                        <span>Konum: {event.country || 'US'}</span>
-                        <span>{new Date(event.timestamp).toLocaleTimeString('tr-TR')}</span>
+                        <div className="text-[11px] font-mono text-slate-500 block">
+                          {isDone ? '✅ Tamamlandı' : '⏳ Bekliyor'}
+                        </div>
                       </div>
                     </div>
-                  ))
-                ) : (
-                  <div className="text-slate-500 py-6 text-center">Henüz canlı kayıt yok.</div>
-                )}
-              </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
 
         {/* ============================================================ */}
-        {/* SEKME 2: YAPAY ZEKA DERİN İSTİHBARATI & VERİ SETLERİ */}
+        {/* SEKME 3: YAPAY ZEKA DERİN İSTİHBARATI */}
         {/* ============================================================ */}
         {activeAdminTab === 'ai-data' && (
           <div className="space-y-8">
-            {/* Üst Bilgilendirme ve Rapor Kopyalama */}
             <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-slate-900 to-slate-900 border border-emerald-500/40 flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div className="space-y-2">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-semibold">
@@ -430,7 +717,7 @@ export default function AdminDashboard() {
                   Derin Telemetri ve Otonom Karar Matrisi
                 </h2>
                 <p className="text-xs sm:text-sm text-slate-400 max-w-2xl leading-relaxed">
-                  Bu veriler sistemimizin dosya tabanında (<code className="text-emerald-400 font-mono">src/data/telemetry_db.json</code>) kalıcı olarak saklanır. Bana ileride &quot;Verileri kontrol et ve bize yeni bir büyüme planı hazırla&quot; dediğinde ben doğrudan bu veri havuzunu analiz ederek sana nokta atışı stratejiler sunacağım.
+                  Bu veriler sistemimizin dosya tabanında (<code className="text-emerald-400 font-mono">src/data/telemetry_db.json</code>) saklanır. Bana &quot;Verileri kontrol et ve bize yeni bir büyüme planı hazırla&quot; dediğinde ben doğrudan bu veri havuzunu analiz ederek nokta atışı stratejiler sunarım.
                 </p>
               </div>
 
@@ -454,9 +741,7 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* Veri Matrisleri: Model Göçleri & Dönüşüm Hunisi */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              {/* Model Göç Akışı */}
               <div className="lg:col-span-6 p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
                 <div className="flex items-center justify-between border-b border-slate-800 pb-3">
                   <h3 className="text-sm font-bold text-white flex items-center gap-2">
@@ -488,7 +773,6 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              {/* Kullanıcı Dönüşüm Hunisi (Funnel) */}
               <div className="lg:col-span-6 p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
                 <div className="flex items-center justify-between border-b border-slate-800 pb-3">
                   <h3 className="text-sm font-bold text-white flex items-center gap-2">
@@ -510,7 +794,7 @@ export default function AdminDashboard() {
                   <div className="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800/80 flex items-center justify-between">
                     <div>
                       <span className="text-xs font-bold text-teal-300 block">2. Aşama: Aktif Hesaplama</span>
-                      <span className="text-[11px] text-slate-500">Kaydırıcıları oynatan ve simüle edenler</span>
+                      <span className="text-[11px] text-slate-500">Simüle edenler</span>
                     </div>
                     <span className="text-sm font-mono font-bold text-teal-400">{data?.funnel.step2_calculations || 0}</span>
                   </div>
@@ -533,43 +817,14 @@ export default function AdminDashboard() {
                 </div>
               </div>
             </div>
-
-            {/* Yapay Zeka Stratejik Aksiyon Kartları */}
-            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-emerald-400" />
-                <span>Kalıcı Veri Havuzundan Üretilen Canlı Tavsiyeler</span>
-              </h3>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {data?.strategicInsights && data.strategicInsights.length > 0 ? (
-                  data.strategicInsights.map((insight, idx) => (
-                    <div key={idx} className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-emerald-400">{insight.title}</span>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                          {insight.priority}
-                        </span>
-                      </div>
-                      <p className="text-xs text-slate-400 leading-relaxed">{insight.desc}</p>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-xs text-slate-500 py-4 col-span-3 text-center">
-                    Veri birikimi devam ediyor...
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
         )}
 
         {/* ============================================================ */}
-        {/* SEKME 3: DÜZENLİ YÖNETİCİ PLAYBOOK'U & REHBERİM */}
+        {/* SEKME 4: PLAYBOOK & REHBERİM */}
         {/* ============================================================ */}
         {activeAdminTab === 'playbook' && (
           <div className="space-y-8 max-w-5xl mx-auto">
-            {/* Üst Özet Kartı */}
             <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 border border-slate-800 space-y-4 shadow-xl">
               <div className="flex items-center justify-between">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-semibold">
@@ -582,7 +837,7 @@ export default function AdminDashboard() {
                 StackCost Operasyonel Playbook
               </h2>
               <p className="text-sm text-slate-400 leading-relaxed max-w-3xl">
-                Karmaşık teknik detaylar kaldırıldı. Projenin nasıl para kazandırdığı, senin 4 basit görevin ve ziyaretçi çekme planımız aşağıda net tablolar halinde özetlenmiştir.
+                Karmaşık teknik detaylar kaldırıldı. Projenin nasıl para kazandırdığı, senin 4 basit görevin ve hızlandırma motorumuz aşağıda net tablolar halinde özetlenmiştir.
               </p>
             </div>
 
@@ -614,7 +869,7 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* 2. Kutu: Hızlandırma Motoru (90 Günü 15 Güne İndirme) */}
+            {/* 2. Kutu: Hızlandırma Motoru */}
             <div className="p-6 rounded-2xl bg-gradient-to-r from-emerald-950/30 via-slate-900 to-slate-900 border border-emerald-500/30 space-y-4">
               <div className="flex items-center justify-between border-b border-slate-800 pb-3">
                 <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
@@ -644,7 +899,7 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* 3. Kutu: Senin Yapacağın 4 Basit Adım (Interaktif Checklist) */}
+            {/* 3. Kutu: Senin Yapacağın 4 Basit Adım */}
             <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
               <div className="flex items-center justify-between border-b border-slate-800 pb-3">
                 <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
@@ -744,33 +999,11 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* 3. Kutu: Amerikalıları Nereden Getireceğiz? */}
+            {/* 4. Kutu: Sıkıştırılmış Gelir Takvimi */}
             <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
               <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                <span>3. Ziyaretçi Çekme Planı (3 Aşama)</span>
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-                <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1">
-                  <span className="font-bold text-emerald-400 block">1. Hafta: Hazır Dizinler</span>
-                  <p className="text-slate-300">ProductHunt ve Toolify gibi dev dizinlere kaydedeceğiz. İlk 200–500 kişi bedava gelecek.</p>
-                </div>
-                <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1">
-                  <span className="font-bold text-teal-400 block">1. Ay: Reddit Toplulukları</span>
-                  <p className="text-slate-300">r/SaaS ve r/LocalLLaMA gruplarında tasarruf analizleri paylaşarak binlerce yazılımcı çekeceğiz.</p>
-                </div>
-                <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1">
-                  <span className="font-bold text-sky-400 block">Kalıcı: Google Aramaları</span>
-                  <p className="text-slate-300">&quot;AWS vs DigitalOcean price&quot; arayan Amerikalılar Google&apos;dan doğrudan sitemize akacak.</p>
-                </div>
-              </div>
-            </div>
-
-            {/* 5. Kutu: Sıkıştırılmış Hızlandırılmış Gelir Takvimi */}
-            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                <span>5. Sıkıştırılmış Hızlandırılmış Gelir Takvimi</span>
+                <span>4. Sıkıştırılmış Hızlandırılmış Gelir Takvimi</span>
               </h3>
               <div className="overflow-x-auto">
                 <table className="w-full text-xs text-left">

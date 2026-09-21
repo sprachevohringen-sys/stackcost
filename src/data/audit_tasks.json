@@ -1,0 +1,152 @@
+{
+  "tasks": [
+    {
+      "id": "task-01",
+      "title": "Next.js 16 & Tailwind CSS v4 Çekirdek Altyapı Kurulumu",
+      "category": "Altyapı",
+      "owner": "AI",
+      "ownerLabel": "Yapay Zeka",
+      "frequency": "Tek Seferlik",
+      "status": "done",
+      "completedAt": "2026-09-21T22:52:00Z",
+      "description": "Statik ön-derlemeli (SSG) modern ve hızlı web mimarisi kuruldu.",
+      "auditNotes": "Build testi 0 hata ile başarıyla geçti."
+    },
+    {
+      "id": "task-02",
+      "title": "LLM, Cloud VPS ve GPU Karşılaştırma Motorlarının Kodlanması",
+      "category": "Yazılım",
+      "owner": "AI",
+      "ownerLabel": "Yapay Zeka",
+      "frequency": "Tek Seferlik",
+      "status": "done",
+      "completedAt": "2026-09-21T22:54:00Z",
+      "description": "GPT-4o, Claude 3.5, DeepSeek, AWS, DigitalOcean ve RunPod fiyatlandırma algoritmaları yazıldı.",
+      "auditNotes": "Prompt caching %90 tasarruf simülasyonu entegre edildi."
+    },
+    {
+      "id": "task-03",
+      "title": "Yüksek Komisyonlu B2B Affiliate Mimarisi (src/config/affiliates.ts)",
+      "category": "Monetizasyon",
+      "owner": "AI",
+      "ownerLabel": "Yapay Zeka",
+      "frequency": "Tek Seferlik",
+      "status": "done",
+      "completedAt": "2026-09-21T22:54:30Z",
+      "description": "DigitalOcean $200, Vultr $100, RunPod ve Together AI anlaşmaları bağlandı.",
+      "auditNotes": "Kullanıcının linklerini 10 saniyede ekleyebileceği merkezi konfigürasyon yapıldı."
+    },
+    {
+      "id": "task-04",
+      "title": "Kalıcı Telemetri ve Yapay Zeka İstihbarat Veri Tabanı",
+      "category": "Veri & Analitik",
+      "owner": "AI",
+      "ownerLabel": "Yapay Zeka",
+      "frequency": "Tek Seferlik",
+      "status": "done",
+      "completedAt": "2026-09-21T23:33:00Z",
+      "description": "telemetry_db.json ve /api/telemetry mimarisi oluşturuldu.",
+      "auditNotes": "Kullanıcı tasarruf hacimleri, model göçleri ve funnel dönüşüm takibi aktif."
+    },
+    {
+      "id": "task-05",
+      "title": "Hızlandırma Motoru (Google Indexing API, HackerNews Lansman Kiti, /embed)",
+      "category": "Büyüme & SEO",
+      "owner": "AI",
+      "ownerLabel": "Yapay Zeka",
+      "frequency": "Tek Seferlik",
+      "status": "done",
+      "completedAt": "2026-09-21T23:56:00Z",
+      "description": "90 günlük bekleme süresini 15 güne indiren 4 hızlandırıcı kodlandı.",
+      "auditNotes": "scripts/google-index.js, launchKit.ts ve /embed widget hazır."
+    },
+    {
+      "id": "task-06",
+      "title": "Domain (Alan Adı) Satın Alımı (~10$)",
+      "category": "Kurulum",
+      "owner": "USER",
+      "ownerLabel": "Yönetici (Sen)",
+      "frequency": "Tek Seferlik",
+      "status": "todo",
+      "description": "Namecheap veya Porkbun üzerinden stackcost.co veya infracalc.com alan adını satın almak.",
+      "auditNotes": "Kullanıcı onayında bekleniyor."
+    },
+    {
+      "id": "task-07",
+      "title": "Ücretsiz GitHub & Vercel Açılışı (Siteyi Yayına Alma)",
+      "category": "Yayın & DevOps",
+      "owner": "ORTAK",
+      "ownerLabel": "Sen + Yapay Zeka",
+      "frequency": "Tek Seferlik",
+      "status": "todo",
+      "description": "github.com ve vercel.com üyelikleri açılıp kodların Vercel'e 1 tıkla bağlanması.",
+      "auditNotes": "Sistem 0 TL sunucu maliyetiyle ömür boyu canlıda kalacak."
+    },
+    {
+      "id": "task-08",
+      "title": "Affiliate Hesaplarına IBAN Bağlayıp Kendi Linklerini Alma",
+      "category": "Finans & Gelir",
+      "owner": "USER",
+      "ownerLabel": "Yönetici (Sen)",
+      "frequency": "Tek Seferlik",
+      "status": "todo",
+      "description": "DigitalOcean, Vultr ve Together AI ortaklık programlarına kaydolup komisyon linklerini almak.",
+      "auditNotes": "Paranın yatacağı banka hesabı kullanıcının kendi adına olacak."
+    },
+    {
+      "id": "task-09",
+      "title": "ProductHunt ve 40+ Yapay Zeka Dizinine Otomatik Kayıt",
+      "category": "Lansman",
+      "owner": "AI",
+      "ownerLabel": "Yapay Zeka",
+      "frequency": "1. Hafta",
+      "status": "todo",
+      "description": "Toolify, There's An AI For That ve ProductHunt dizinlerine başvuruların yapılması.",
+      "auditNotes": "İlk 500 organik Amerikalı ziyaretçiyi çekme hedefi."
+    },
+    {
+      "id": "task-10",
+      "title": "HackerNews 'Show HN' ve Reddit Değer Bombası Lansmanı",
+      "category": "Viral Trafik",
+      "owner": "ORTAK",
+      "ownerLabel": "Sen + Yapay Zeka",
+      "frequency": "1. Hafta",
+      "status": "todo",
+      "description": "launchKit.ts içindeki hazır metinle HackerNews ve r/LocalLLaMA paylaşımlarının yapılması.",
+      "auditNotes": "Tek günde 5.000–15.000 Amerikalı yazılımcı çekme hedefi."
+    },
+    {
+      "id": "task-11",
+      "title": "Haftalık Veri Analizi ve Otomasyon Raporu Çıkarma",
+      "category": "İç Denetim & İyileştirme",
+      "owner": "AI",
+      "ownerLabel": "Yapay Zeka",
+      "frequency": "Haftalık",
+      "status": "todo",
+      "description": "telemetry_db.json dosyasını okuyarak en çok hangi modellerin hesaplandığını ve yeni fırsatları tespit etmek.",
+      "auditNotes": "Yöneticiye haftalık aksiyon planı sunulacak."
+    },
+    {
+      "id": "task-12",
+      "title": "Haftalık Panel ve Banka Komisyon Bakiyesi Kontrolü",
+      "category": "Rutin Kontrol",
+      "owner": "USER",
+      "ownerLabel": "Yönetici (Sen)",
+      "frequency": "Haftalık (5 Dk)",
+      "status": "todo",
+      "description": "/admin paneline ve affiliate hesaplarına girip biriken Dolar komisyonunu kontrol etmek.",
+      "auditNotes": "Her Cuma veya Pazartesi 5 dakika ayrılacak."
+    },
+    {
+      "id": "task-13",
+      "title": "Aylık Banka Havalesi ve Kazanç Çekimi",
+      "category": "Finans",
+      "owner": "USER",
+      "ownerLabel": "Yönetici (Sen)",
+      "frequency": "Aylık",
+      "status": "todo",
+      "description": "Affiliate ağlarından (DigitalOcean, Together AI vb.) biriken komisyonları Türkiye'deki banka hesabına çekmek.",
+      "auditNotes": "Net-30 takvimiyle her ay düzenli çekim."
+    }
+  ]
+}
