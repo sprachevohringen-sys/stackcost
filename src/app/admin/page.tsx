@@ -675,11 +675,53 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* Bölüm 3: Senin Yapman Gerekenler (Canlı Kontrol Listesi) */}
+            {/* Bölüm 3: Veri = Para ve Otonom Büyüme Döngüsü */}
+            <div className="p-6 sm:p-8 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-6">
+              <div className="flex items-center gap-2.5 border-b border-slate-800 pb-4">
+                <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400 font-bold">
+                  3
+                </div>
+                <h3 className="text-lg font-bold text-white">
+                  Veri = Para: Derin Telemetri ve Otonom Geliştirme Döngüsü
+                </h3>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
+                  <span className="text-xs font-bold text-emerald-400 block">1. Kalıcı Veri Tabanı (telemetry_db.json)</span>
+                  <p className="text-xs text-slate-300 leading-relaxed">
+                    Sitede yapılan her hesaplama, tasarruf miktarı, kopyalanan bütçeler ve tıklanan partner linkleri disk üzerinde kalıcı olarak saklanır. Sunucu kapansa dahi hiçbir veri kaybolmaz.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
+                  <span className="text-xs font-bold text-teal-400 block">2. Model Göçleri & Kullanıcı Niyeti</span>
+                  <p className="text-xs text-slate-300 leading-relaxed">
+                    Kullanıcıların hangi pahalı modelden kaçıp hangi ucuz alternatife geçmek istediğini yakalarız. Bu veri, Reddit ve Twitter&apos;da tam o konu üzerine odaklanmamızı sağlar.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
+                  <span className="text-xs font-bold text-sky-400 block">3. Otonom Geri Besleme Döngüsü</span>
+                  <p className="text-xs text-slate-300 leading-relaxed">
+                    Bana ileride &quot;Verileri incele ve bana bu haftanın aksiyon planını çıkar&quot; dediğinde ben doğrudan bu veri havuzunu okuyup sana kanıtlanmış büyüme stratejisi sunarım.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
+                  <span className="text-xs font-bold text-purple-400 block">4. Dönüşüm Hunisi (Funnel) Takibi</span>
+                  <p className="text-xs text-slate-300 leading-relaxed">
+                    Ziyaretçiden komisyona giden yolda nerede kayıp yaşadığımızı görerek arayüzü ve butonları en yüksek kâr getirecek şekilde anında güncelleriz.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Bölüm 4: Senin Yapman Gerekenler (Canlı Kontrol Listesi) */}
             <div className="p-6 sm:p-8 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-6">
               <div className="flex items-center gap-2.5 border-b border-slate-800 pb-4">
                 <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 font-bold">
-                  3
+                  4
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-white">
