@@ -23,6 +23,9 @@ export const Footer: React.FC = () => {
             <a href="#cloud" className="hover:text-emerald-400 transition-colors">Cloud Servers</a>
             <a href="#gpu" className="hover:text-emerald-400 transition-colors">GPU Benchmark</a>
             <a href="#free-credits" className="hover:text-emerald-400 transition-colors">Promo Credits</a>
+            <a href="/admin" className="text-emerald-400 hover:text-emerald-300 font-semibold transition-colors flex items-center gap-1">
+              <span>Admin Hub</span>
+            </a>
           </div>
         </div>
 

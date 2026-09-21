@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   Zap
 } from 'lucide-react';
+import { trackEvent } from '@/lib/telemetry';
 
 export const LLMCalculator: React.FC = () => {
   const [selectedModelId, setSelectedModelId] = useState<string>('gpt-4o');
@@ -80,6 +81,11 @@ export const LLMCalculator: React.FC = () => {
   const bestAlternative = comparisons.find((c) => c.percentSavings > 0) || comparisons[0];
 
   const handleCopySummary = () => {
+    trackEvent('budget_summary_copied', {
+      model: selectedModel.name,
+      monthlyBurn: baselineCost,
+      annualSavings: bestAlternative.annualSavings,
+    });
     const summary = `📊 StackCost AI Budget Summary:
 Current Stack: ${selectedModel.name} ($${baselineCost.toLocaleString('en-US', { maximumFractionDigits: 0 })}/mo)
 Recommended: ${bestAlternative.model.name} ($${bestAlternative.cost.toLocaleString('en-US', { maximumFractionDigits: 0 })}/mo)
@@ -308,6 +314,14 @@ Calculated via: https://stackcost.co`;
                     href={AFFILIATE_CONFIG.togetherai.referralUrl}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={() => {
+                      trackEvent('affiliate_clicked', {
+                        partnerId: 'togetherai',
+                        partnerName: 'Together AI',
+                        location: 'llm_hero_banner',
+                        model: bestAlternative.model.name,
+                      });
+                    }}
                     className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold transition-all shadow-md shadow-emerald-500/20"
                   >
                     <span>{AFFILIATE_CONFIG.togetherai.ctaText}</span>
