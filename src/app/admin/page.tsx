@@ -614,12 +614,42 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* 2. Kutu: Senin Yapacağın 4 Basit Adım (Interaktif Checklist) */}
+            {/* 2. Kutu: Hızlandırma Motoru (90 Günü 15 Güne İndirme) */}
+            <div className="p-6 rounded-2xl bg-gradient-to-r from-emerald-950/30 via-slate-900 to-slate-900 border border-emerald-500/30 space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                  <span>2. Hızlandırma Motoru: 90 Günü 15 Güne Nasıl İndiriyoruz?</span>
+                </h3>
+                <span className="text-xs text-emerald-400 font-semibold">Sandbox Kırıcılar</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+                <div className="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1">
+                  <span className="font-bold text-emerald-400 block">1. Google Indexing API</span>
+                  <p className="text-slate-300">Botu zorla çağırarak sayfaları 24 saatte Google&apos;a işletiriz.</p>
+                </div>
+                <div className="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1">
+                  <span className="font-bold text-teal-400 block">2. GitHub Parazit Otoritesi</span>
+                  <p className="text-slate-300">DA 96 açık kaynak repo ile 48 saatte ilk sayfaya çıkarız.</p>
+                </div>
+                <div className="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1">
+                  <span className="font-bold text-sky-400 block">3. HackerNews &quot;Show HN&quot;</span>
+                  <p className="text-slate-300">Tek günde 5.000–15.000 üst düzey Amerikalı yazılımcı çekeriz.</p>
+                </div>
+                <div className="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1">
+                  <span className="font-bold text-purple-400 block">4. Gömülebilir Widget (/embed)</span>
+                  <p className="text-slate-300">Başka teknoloji bloglarının okuyucuları bizim linkimizden komisyon üretir.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* 3. Kutu: Senin Yapacağın 4 Basit Adım (Interaktif Checklist) */}
             <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
               <div className="flex items-center justify-between border-b border-slate-800 pb-3">
                 <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                  <span>2. Senin Yapacağın 4 Basit Adım (Sırayla)</span>
+                  <span>3. Senin Yapacağın 4 Basit Adım (Sırayla)</span>
                 </h3>
                 <span className="text-xs text-slate-500">Tamamladıkça tıkla</span>
               </div>
@@ -736,40 +766,40 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* 4. Kutu: Gerçekçi Gelir Tablosu */}
+            {/* 5. Kutu: Sıkıştırılmış Hızlandırılmış Gelir Takvimi */}
             <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
               <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                <span>4. Gerçekçi Gelir Tablosu</span>
+                <span>5. Sıkıştırılmış Hızlandırılmış Gelir Takvimi</span>
               </h3>
               <div className="overflow-x-auto">
                 <table className="w-full text-xs text-left">
                   <thead className="bg-slate-950/80 text-slate-400 uppercase font-mono border-b border-slate-800">
                     <tr>
-                      <th className="p-3">Günlük Ziyaretçi</th>
-                      <th className="p-3">Kaydolan Kişi</th>
-                      <th className="p-3">Komisyon</th>
-                      <th className="p-3 text-emerald-400">Aylık Tahmini Net Gelir</th>
+                      <th className="p-3">Dönem</th>
+                      <th className="p-3 text-slate-500">Eski Bekleme Modeli</th>
+                      <th className="p-3 text-emerald-400">Yeni Hızlandırılmış Model (Bizimki)</th>
+                      <th className="p-3">Açıklama</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-800/60 font-medium">
                     <tr className="hover:bg-slate-950/40">
-                      <td className="p-3 text-white">30 – 50 Kişi</td>
-                      <td className="p-3 text-slate-300">Günde 1 Kişi</td>
-                      <td className="p-3 font-mono">50$</td>
-                      <td className="p-3 font-mono font-bold text-emerald-400">1.500$ (~55.000 TL)</td>
+                      <td className="p-3 text-white font-bold">1. – 7. Gün</td>
+                      <td className="p-3 text-slate-500">0$ (Kimse bilmez)</td>
+                      <td className="p-3 font-mono font-bold text-emerald-400">100$ – 300$</td>
+                      <td className="p-3 text-slate-300">HackerNews Show HN & GitHub parazit lansmanı ile ilk satışlar</td>
                     </tr>
                     <tr className="hover:bg-slate-950/40">
-                      <td className="p-3 text-white">100 Kişi</td>
-                      <td className="p-3 text-slate-300">Günde 2 Kişi</td>
-                      <td className="p-3 font-mono">50$</td>
-                      <td className="p-3 font-mono font-bold text-emerald-400">3.000$ (~110.000 TL)</td>
+                      <td className="p-3 text-white font-bold">2. – 3. Hafta</td>
+                      <td className="p-3 text-slate-500">0$ – 50$ (Bekleme)</td>
+                      <td className="p-3 font-mono font-bold text-emerald-400">500$ – 1.000$</td>
+                      <td className="p-3 text-slate-300">Google Indexing API ve hazır dizinlerden gelen düzenli akış</td>
                     </tr>
                     <tr className="hover:bg-slate-950/40">
-                      <td className="p-3 text-white">200+ Kişi</td>
-                      <td className="p-3 text-slate-300">Günde 4–5 Kişi</td>
-                      <td className="p-3 font-mono">50$</td>
-                      <td className="p-3 font-mono font-bold text-emerald-400">6.000$ – 7.500$ (200.000+ TL)</td>
+                      <td className="p-3 text-white font-bold">1. Ay Sonu</td>
+                      <td className="p-3 text-slate-500">150$ – 500$</td>
+                      <td className="p-3 font-mono font-bold text-emerald-400">1.500$ – 3.000$</td>
+                      <td className="p-3 text-slate-300">Normalde 3 ay sürecek pasif gelir seviyesine 30 günde ulaşma</td>
                     </tr>
                   </tbody>
                 </table>
