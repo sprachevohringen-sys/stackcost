@@ -1,36 +1,49 @@
 'use client';
 
-export interface TelemetryEvent {
-  type: 'pageview' | 'model_calculated' | 'cloud_calculated' | 'gpu_calculated' | 'affiliate_clicked' | 'budget_summary_copied';
-  timestamp?: number;
+export interface TelemetryEventPayload {
+  type: 'pageview' | 'calculation' | 'affiliate_click' | 'budget_summary_copied';
   referrer?: string;
   metadata?: Record<string, any>;
 }
 
-export const trackEvent = (type: TelemetryEvent['type'], metadata?: Record<string, any>) => {
+// Generate or retrieve persistent anonymous session ID
+function getSessionId(): string {
+  if (typeof window === 'undefined') return 'server_session';
+  try {
+    let sid = sessionStorage.getItem('sc_session_id');
+    if (!sid) {
+      sid = 'sess_' + Math.random().toString(36).substring(2, 11);
+      sessionStorage.setItem('sc_session_id', sid);
+    }
+    return sid;
+  } catch {
+    return 'sess_fallback';
+  }
+}
+
+export const trackEvent = (type: TelemetryEventPayload['type'], metadata?: Record<string, any>) => {
   if (typeof window === 'undefined') return;
 
-  const eventData: TelemetryEvent = {
+  const payload = {
     type,
-    timestamp: Date.now(),
-    referrer: document.referrer || 'Direct / Organic',
+    sessionId: getSessionId(),
+    referrer: document.referrer || 'Doğrudan / Organik',
     metadata: metadata || {},
   };
 
   try {
-    const payload = JSON.stringify(eventData);
+    const raw = JSON.stringify(payload);
     if (navigator.sendBeacon) {
-      navigator.sendBeacon('/api/telemetry', payload);
+      navigator.sendBeacon('/api/telemetry', raw);
     } else {
       fetch('/api/telemetry', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: payload,
+        body: raw,
         keepalive: true,
       });
     }
   } catch (err) {
-    // Telemetry errors should never interrupt user experience
     console.debug('Telemetry logging silently failed', err);
   }
 };

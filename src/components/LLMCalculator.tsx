@@ -315,11 +315,14 @@ Calculated via: https://stackcost.co`;
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => {
-                      trackEvent('affiliate_clicked', {
+                      trackEvent('affiliate_click', {
                         partnerId: 'togetherai',
                         partnerName: 'Together AI',
+                        dealText: AFFILIATE_CONFIG.togetherai.dealHighlight,
                         location: 'llm_hero_banner',
-                        model: bestAlternative.model.name,
+                        sourceModel: selectedModel.name,
+                        targetModel: bestAlternative.model.name,
+                        annualSavings: bestAlternative.annualSavings,
                       });
                     }}
                     className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold transition-all shadow-md shadow-emerald-500/20"

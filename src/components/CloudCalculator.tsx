@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { CLOUD_TIERS, CloudTier } from '@/data/cloudProviders';
 import { AFFILIATE_CONFIG } from '@/config/affiliates';
 import { Server, Check, ArrowRight, ExternalLink, ShieldAlert, Zap, TrendingDown } from 'lucide-react';
+import { trackEvent } from '@/lib/telemetry';
 
 export const CloudCalculator: React.FC = () => {
   const [selectedTierId, setSelectedTierId] = useState<string>('growth');
@@ -188,6 +189,17 @@ export const CloudCalculator: React.FC = () => {
               href={AFFILIATE_CONFIG.digitalocean.referralUrl}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() => {
+                trackEvent('affiliate_click', {
+                  partnerId: 'digitalocean',
+                  partnerName: 'DigitalOcean',
+                  dealText: AFFILIATE_CONFIG.digitalocean.dealHighlight,
+                  location: 'cloud_droplet_card',
+                  tier: currentTier.name,
+                  instances: instanceCount,
+                  annualSavings: annualAwsSavingsDo,
+                });
+              }}
               className="w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold transition-all shadow-md shadow-emerald-500/20"
             >
               <span>{AFFILIATE_CONFIG.digitalocean.ctaText}</span>
@@ -239,6 +251,17 @@ export const CloudCalculator: React.FC = () => {
               href={AFFILIATE_CONFIG.vultr.referralUrl}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() => {
+                trackEvent('affiliate_click', {
+                  partnerId: 'vultr',
+                  partnerName: 'Vultr',
+                  dealText: AFFILIATE_CONFIG.vultr.dealHighlight,
+                  location: 'cloud_vultr_card',
+                  tier: currentTier.name,
+                  instances: instanceCount,
+                  annualSavings: (awsTotal - vultrTotal) * 12,
+                });
+              }}
               className="w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition-all"
             >
               <span>{AFFILIATE_CONFIG.vultr.ctaText}</span>

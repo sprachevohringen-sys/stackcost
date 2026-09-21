@@ -19,7 +19,13 @@ import {
   ExternalLink,
   Target,
   Layers,
-  Globe
+  Globe,
+  Download,
+  Copy,
+  Check,
+  Zap,
+  ArrowRight,
+  PieChart
 } from 'lucide-react';
 
 interface TelemetryData {
@@ -28,14 +34,31 @@ interface TelemetryData {
     totalCalculations: number;
     totalAffiliateClicks: number;
     conversionRate: string;
+    totalSimulatedAnnualSavings: number;
   };
-  affiliateBreakdown: Record<string, number>;
+  funnel: {
+    step1_visitors: number;
+    step2_calculations: number;
+    step3_copies: number;
+    step4_clicks: number;
+    calculationRate: string;
+    conversionRate: string;
+  };
+  migrationFlows: Record<string, number>;
+  affiliateBreakdown: Record<string, { clicks: number; deals: string[] }>;
   referrerBreakdown: Record<string, number>;
+  countryBreakdown: Record<string, number>;
+  strategicInsights: Array<{
+    title: string;
+    desc: string;
+    priority: 'Yüksek' | 'Orta' | 'Kritik';
+  }>;
   recentEvents: Array<{
     id: string;
     type: string;
     timestamp: number;
     referrer: string;
+    country?: string;
     metadata: Record<string, any>;
   }>;
 }
@@ -44,7 +67,8 @@ export default function AdminDashboard() {
   const [data, setData] = useState<TelemetryData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [lastRefreshed, setLastRefreshed] = useState<string>('');
-  const [activeAdminTab, setActiveAdminTab] = useState<'analytics' | 'playbook'>('analytics');
+  const [activeAdminTab, setActiveAdminTab] = useState<'analytics' | 'playbook' | 'ai-data'>('analytics');
+  const [copiedJson, setCopiedJson] = useState<boolean>(false);
 
   // Checklist state for user tasks
   const [checklist, setChecklist] = useState<Record<string, boolean>>({
@@ -80,21 +104,38 @@ export default function AdminDashboard() {
     return () => clearInterval(interval);
   }, []);
 
+  const handleCopyAIExport = () => {
+    if (!data) return;
+    const aiPayload = {
+      timestamp: new Date().toISOString(),
+      platform: 'StackCost Intelligence',
+      metrics: data.metrics,
+      funnel: data.funnel,
+      migrationFlows: data.migrationFlows,
+      affiliates: data.affiliateBreakdown,
+      trafficSources: data.referrerBreakdown,
+      countries: data.countryBreakdown,
+      systemRecommendations: data.strategicInsights,
+    };
+
+    navigator.clipboard.writeText(JSON.stringify(aiPayload, null, 2));
+    setCopiedJson(true);
+    setTimeout(() => setCopiedJson(false), 2500);
+  };
+
   // Event name translator to Turkish
   const translateEventType = (type: string) => {
     switch (type) {
+      case 'affiliate_click':
       case 'affiliate_clicked':
         return 'Komisyon Tıklaması';
+      case 'calculation':
       case 'model_calculated':
-        return 'Yapay Zeka Hesabı';
-      case 'cloud_calculated':
-        return 'Sunucu Hesabı';
-      case 'gpu_calculated':
-        return 'GPU Hesabı';
+        return 'Hesaplama Yapıldı';
       case 'pageview':
         return 'Sayfa Ziyareti';
       case 'budget_summary_copied':
-        return 'Özet Kopyalandı';
+        return 'Bütçe Kopyalandı';
       default:
         return type;
     }
@@ -117,21 +158,21 @@ export default function AdminDashboard() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-2xl font-extrabold text-white tracking-tight">
-                  StackCost Yönetim Merkezi
+                  StackCost Yönetim & İstihbarat Merkezi
                 </h1>
                 <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-semibold flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  Canlı Takip Açık
+                  Kalıcı Veri Tabanı Aktif
                 </span>
               </div>
               <p className="text-xs text-slate-400 mt-0.5">
-                Ziyaretçi hareketleri, yapılan hesaplamalar, komisyonlar ve operasyonel rehberin
+                Kullanıcı niyetleri, tasarruf hacimleri, model göçleri ve yapay zeka analiz motoru
               </p>
             </div>
           </div>
 
-          {/* Sekme Değiştirici & Yenileme */}
-          <div className="flex items-center gap-3">
+          {/* Sekme Değiştirici & Aksiyonlar */}
+          <div className="flex flex-wrap items-center gap-3">
             <div className="bg-slate-900/90 p-1 rounded-xl border border-slate-800 flex items-center gap-1">
               <button
                 onClick={() => setActiveAdminTab('analytics')}
@@ -144,6 +185,19 @@ export default function AdminDashboard() {
                 <BarChart3 className="w-3.5 h-3.5" />
                 <span>Canlı Analitik</span>
               </button>
+
+              <button
+                onClick={() => setActiveAdminTab('ai-data')}
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  activeAdminTab === 'ai-data'
+                    ? 'bg-emerald-500 text-slate-950 shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Yapay Zeka İstihbaratı</span>
+              </button>
+
               <button
                 onClick={() => setActiveAdminTab('playbook')}
                 className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
@@ -174,11 +228,11 @@ export default function AdminDashboard() {
         {/* ============================================================ */}
         {activeAdminTab === 'analytics' && (
           <div className="space-y-8">
-            {/* 4 Büyük Gösterge Kartı */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-              <div className="p-6 rounded-2xl bg-slate-900/70 border border-slate-800/80 space-y-2">
+            {/* 5 Büyük Gösterge Kartı */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div className="p-5 rounded-2xl bg-slate-900/70 border border-slate-800/80 space-y-2">
                 <div className="flex items-center justify-between text-slate-400">
-                  <span className="text-xs font-semibold uppercase tracking-wider">Toplam Ziyaretçi</span>
+                  <span className="text-[11px] font-semibold uppercase tracking-wider">Toplam Ziyaretçi</span>
                   <Users className="w-4 h-4 text-emerald-400" />
                 </div>
                 <div className="text-3xl font-black text-white font-mono">
@@ -186,46 +240,59 @@ export default function AdminDashboard() {
                 </div>
                 <span className="text-[11px] text-emerald-400 font-medium flex items-center gap-1">
                   <TrendingUp className="w-3 h-3" />
-                  Siteye giren aktif oturumlar
+                  Aktif oturumlar
                 </span>
               </div>
 
-              <div className="p-6 rounded-2xl bg-slate-900/70 border border-slate-800/80 space-y-2">
+              <div className="p-5 rounded-2xl bg-slate-900/70 border border-slate-800/80 space-y-2">
                 <div className="flex items-center justify-between text-slate-400">
-                  <span className="text-xs font-semibold uppercase tracking-wider">Yapılan Hesaplamalar</span>
+                  <span className="text-[11px] font-semibold uppercase tracking-wider">Hesaplamalar</span>
                   <Calculator className="w-4 h-4 text-teal-400" />
                 </div>
                 <div className="text-3xl font-black text-white font-mono">
                   {data?.metrics.totalCalculations || 0}
                 </div>
                 <span className="text-[11px] text-slate-400">
-                  AI, Sunucu ve GPU hesaplamaları
+                  Simüle edilen senaryolar
                 </span>
               </div>
 
-              <div className="p-6 rounded-2xl bg-slate-900/70 border border-slate-800/80 space-y-2">
+              <div className="p-5 rounded-2xl bg-slate-900/70 border border-slate-800/80 space-y-2">
                 <div className="flex items-center justify-between text-slate-400">
-                  <span className="text-xs font-semibold uppercase tracking-wider">Komisyon Tıklaması</span>
+                  <span className="text-[11px] font-semibold uppercase tracking-wider">Komisyon Tıklaması</span>
                   <MousePointerClick className="w-4 h-4 text-emerald-400" />
                 </div>
                 <div className="text-3xl font-black text-emerald-400 font-mono">
                   {data?.metrics.totalAffiliateClicks || 0}
                 </div>
                 <span className="text-[11px] text-emerald-300 font-medium">
-                  Partner linklerine basan potansiyel müşteriler
+                  Yönlendirilen müşteri
                 </span>
               </div>
 
-              <div className="p-6 rounded-2xl bg-slate-900/70 border border-slate-800/80 space-y-2">
+              <div className="p-5 rounded-2xl bg-slate-900/70 border border-slate-800/80 space-y-2">
                 <div className="flex items-center justify-between text-slate-400">
-                  <span className="text-xs font-semibold uppercase tracking-wider">Dönüşüm Oranı</span>
+                  <span className="text-[11px] font-semibold uppercase tracking-wider">Dönüşüm Oranı</span>
                   <BarChart3 className="w-4 h-4 text-sky-400" />
                 </div>
                 <div className="text-3xl font-black text-white font-mono">
                   %{data?.metrics.conversionRate || '0.0'}
                 </div>
                 <span className="text-[11px] text-slate-400">
-                  Her 100 kişiden tıklayan sayısı
+                  Ziyaretçi başına tık
+                </span>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-gradient-to-br from-emerald-950/40 to-slate-900 border border-emerald-500/30 space-y-2">
+                <div className="flex items-center justify-between text-emerald-400">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider">Tasarruf Hacmi</span>
+                  <DollarSign className="w-4 h-4 text-emerald-400" />
+                </div>
+                <div className="text-2xl sm:text-3xl font-black text-emerald-400 font-mono">
+                  ${(data?.metrics.totalSimulatedAnnualSavings || 0).toLocaleString('en-US')}
+                </div>
+                <span className="text-[11px] text-slate-400">
+                  Kullanıcıların aradığı yıllık tasarruf
                 </span>
               </div>
             </div>
@@ -239,19 +306,21 @@ export default function AdminDashboard() {
                     <MousePointerClick className="w-4 h-4 text-emerald-400" />
                     <span>En Çok Tıklanan Partner Şirketler</span>
                   </h3>
-                  <span className="text-xs text-slate-500">Şirket Bazlı</span>
+                  <span className="text-xs text-slate-500">Komisyon Kaynakları</span>
                 </div>
 
                 <div className="space-y-3">
                   {data?.affiliateBreakdown && Object.keys(data.affiliateBreakdown).length > 0 ? (
-                    Object.entries(data.affiliateBreakdown).map(([partner, count]) => (
+                    Object.entries(data.affiliateBreakdown).map(([partner, info]) => (
                       <div key={partner} className="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800/80 flex items-center justify-between">
                         <div>
                           <span className="text-sm font-bold text-white">{partner}</span>
-                          <span className="text-xs text-slate-400 block mt-0.5">Yüksek komisyonlu B2B anlaşması</span>
+                          <span className="text-xs text-slate-400 block mt-0.5">
+                            {info.deals?.[0] || 'Yüksek komisyonlu anlaşma'}
+                          </span>
                         </div>
                         <div className="text-right">
-                          <span className="text-base font-bold font-mono text-emerald-400">{count} tıklama</span>
+                          <span className="text-base font-bold font-mono text-emerald-400">{info.clicks} tıklama</span>
                           <span className="text-[11px] text-slate-500 block">Kayıt yönlendirmesi</span>
                         </div>
                       </div>
@@ -291,49 +360,14 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* Yapay Zeka Strateji ve Öngörü Kutusu */}
-            <div className="p-6 rounded-2xl bg-gradient-to-r from-emerald-950/30 via-slate-900 to-slate-900 border border-emerald-500/30 space-y-4">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400">
-                  <Sparkles className="w-4 h-4" />
-                </div>
-                <h3 className="text-base font-bold text-white">
-                  Yapay Zekanın Büyüme Tavsiyeleri & Aksiyon Planı
-                </h3>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-slate-300">
-                <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-1.5">
-                  <span className="text-emerald-400 font-bold block">1. DeepSeek V3 Fırsatı</span>
-                  <p className="text-slate-400 leading-relaxed">
-                    Kullanıcılar en çok DeepSeek V3 hesaplaması yapıyor. Reddit &apos;r/LocalLLaMA&apos; grubunda yapacağımız bir paylaşım anında yüzlerce tıklama çekecektir.
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-1.5">
-                  <span className="text-teal-400 font-bold block">2. $200 Bedava Kredi Çekimi</span>
-                  <p className="text-slate-400 leading-relaxed">
-                    DigitalOcean için koyduğumuz &apos;200$ Hediye Kredi&apos; rozeti tıklamaların %60&apos;ını topluyor. İnsanlar hediye kredi tekliflerini çok seviyor.
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-1.5">
-                  <span className="text-sky-400 font-bold block">3. Dizin Başvuruları</span>
-                  <p className="text-slate-400 leading-relaxed">
-                    Toolify ve ProductHunt dizinlerine siteyi kaydettiğimiz gün, hiçbir reklam parası harcamadan ilk 500 Amerikalı kullanıcı siteye doluşacaktır.
-                  </p>
-                </div>
-              </div>
-            </div>
-
             {/* Canlı Kullanıcı Hareketleri (Log Akışı) */}
             <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
               <div className="flex items-center justify-between border-b border-slate-800 pb-3">
                 <h3 className="text-sm font-bold text-white flex items-center gap-2">
                   <Clock className="w-4 h-4 text-slate-400" />
-                  <span>Canlı Kullanıcı Hareketleri (Son 25 Hareket)</span>
+                  <span>Canlı Kullanıcı Hareketleri (Son 30 Hareket)</span>
                 </h3>
-                <span className="text-xs text-slate-500">Milisaniyelik log akışı</span>
+                <span className="text-xs text-slate-500">Milisaniyelik kalıcı log akışı</span>
               </div>
 
               <div className="space-y-2 max-h-80 overflow-y-auto font-mono text-xs">
@@ -346,7 +380,7 @@ export default function AdminDashboard() {
                       <div className="flex items-center gap-2.5">
                         <span
                           className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                            event.type === 'affiliate_clicked'
+                            event.type === 'affiliate_click'
                               ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                               : event.type === 'pageview'
                               ? 'bg-sky-500/20 text-sky-400 border border-sky-500/30'
@@ -357,17 +391,17 @@ export default function AdminDashboard() {
                         </span>
                         <span className="text-slate-300">
                           {event.metadata.partnerName
-                            ? `${event.metadata.partnerName} (${event.metadata.cta || 'Buton'}) Tıklandı`
-                            : event.metadata.model
-                            ? `${event.metadata.model} Hesaplandı`
+                            ? `${event.metadata.partnerName} Tıklandı (${event.metadata.dealText || 'Teklif'})`
+                            : event.metadata.sourceModel
+                            ? `${event.metadata.sourceModel} → ${event.metadata.targetModel} ($${event.metadata.annualSavings?.toLocaleString('en-US') || 0}/yıl tasarruf)`
                             : event.metadata.tier
                             ? `${event.metadata.tier} Sunucu İncelendi`
-                            : `Site Gezildi (${event.metadata.path || '/'})`}
+                            : `Sayfa Gezildi (${event.metadata.path || '/'})`}
                         </span>
                       </div>
 
                       <div className="flex items-center gap-4 text-slate-500 text-[11px]">
-                        <span>Kaynak: {event.referrer}</span>
+                        <span>Konum: {event.country || 'US'}</span>
                         <span>{new Date(event.timestamp).toLocaleTimeString('tr-TR')}</span>
                       </div>
                     </div>
@@ -381,7 +415,157 @@ export default function AdminDashboard() {
         )}
 
         {/* ============================================================ */}
-        {/* SEKME 2: ENTEGRE PLAYBOOK & OPERASYONEL REHBER */}
+        {/* SEKME 2: YAPAY ZEKA DERİN İSTİHBARATI & VERİ SETLERİ */}
+        {/* ============================================================ */}
+        {activeAdminTab === 'ai-data' && (
+          <div className="space-y-8">
+            {/* Üst Bilgilendirme ve Rapor Kopyalama */}
+            <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-slate-900 to-slate-900 border border-emerald-500/40 flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="space-y-2">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-semibold">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Yapay Zeka İçin Yapılandırılmış Veri Katmanı</span>
+                </div>
+                <h2 className="text-2xl font-extrabold text-white">
+                  Derin Telemetri ve Otonom Karar Matrisi
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-400 max-w-2xl leading-relaxed">
+                  Bu veriler sistemimizin dosya tabanında (<code className="text-emerald-400 font-mono">src/data/telemetry_db.json</code>) kalıcı olarak saklanır. Bana ileride &quot;Verileri kontrol et ve bize yeni bir büyüme planı hazırla&quot; dediğinde ben doğrudan bu veri havuzunu analiz ederek sana nokta atışı stratejiler sunacağım.
+                </p>
+              </div>
+
+              <div className="shrink-0 flex items-center gap-3">
+                <button
+                  onClick={handleCopyAIExport}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold transition-all shadow-lg shadow-emerald-500/20"
+                >
+                  {copiedJson ? (
+                    <>
+                      <Check className="w-4 h-4" />
+                      <span>Rapor Kopyalandı!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4" />
+                      <span>Yapay Zeka Raporunu Kopyala</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Veri Matrisleri: Model Göçleri & Dönüşüm Hunisi */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              {/* Model Göç Akışı */}
+              <div className="lg:col-span-6 p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                    <Zap className="w-4 h-4 text-emerald-400" />
+                    <span>Kullanıcı Niyeti: Hangi Modellerden Kaçıyorlar?</span>
+                  </h3>
+                  <span className="text-xs text-slate-500">Göç Analizi</span>
+                </div>
+
+                <div className="space-y-3">
+                  {data?.migrationFlows && Object.keys(data.migrationFlows).length > 0 ? (
+                    Object.entries(data.migrationFlows).map(([flow, count]) => (
+                      <div key={flow} className="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800/80 flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-sm font-semibold text-white">
+                          <span>{flow.split('→')[0]}</span>
+                          <ArrowRight className="w-3.5 h-3.5 text-emerald-400" />
+                          <span className="text-emerald-400">{flow.split('→')[1]}</span>
+                        </div>
+                        <span className="text-xs font-mono font-bold bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20">
+                          {count} istek
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-xs text-slate-500 py-6 text-center">
+                      Model göç hareketleri kaydediliyor...
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Kullanıcı Dönüşüm Hunisi (Funnel) */}
+              <div className="lg:col-span-6 p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                    <Target className="w-4 h-4 text-sky-400" />
+                    <span>Kullanıcı Dönüşüm Hunisi (Funnel Drop-off)</span>
+                  </h3>
+                  <span className="text-xs text-slate-500">Aşama Verimi</span>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800/80 flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-bold text-slate-200 block">1. Aşama: Sayfa Ziyareti</span>
+                      <span className="text-[11px] text-slate-500">Siteye iniş yapan toplam kişi</span>
+                    </div>
+                    <span className="text-sm font-mono font-bold text-white">{data?.funnel.step1_visitors || 0}</span>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800/80 flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-bold text-teal-300 block">2. Aşama: Aktif Hesaplama</span>
+                      <span className="text-[11px] text-slate-500">Kaydırıcıları oynatan ve simüle edenler</span>
+                    </div>
+                    <span className="text-sm font-mono font-bold text-teal-400">{data?.funnel.step2_calculations || 0}</span>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800/80 flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-bold text-emerald-300 block">3. Aşama: Bütçe Özeti Kopyalama</span>
+                      <span className="text-[11px] text-slate-500">Ekibine götürmek için rapor alanlar</span>
+                    </div>
+                    <span className="text-sm font-mono font-bold text-emerald-400">{data?.funnel.step3_copies || 0}</span>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-slate-950/70 border border-emerald-500/30 flex items-center justify-between bg-emerald-950/10">
+                    <div>
+                      <span className="text-xs font-bold text-emerald-400 block">4. Aşama: Komisyon Butonu Tıklaması</span>
+                      <span className="text-[11px] text-emerald-300">Partner şirketlere giden nakit potansiyeli</span>
+                    </div>
+                    <span className="text-base font-mono font-black text-emerald-400">{data?.funnel.step4_clicks || 0}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Yapay Zeka Stratejik Aksiyon Kartları */}
+            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
+              <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-emerald-400" />
+                <span>Kalıcı Veri Havuzundan Üretilen Canlı Tavsiyeler</span>
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {data?.strategicInsights && data.strategicInsights.length > 0 ? (
+                  data.strategicInsights.map((insight, idx) => (
+                    <div key={idx} className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-emerald-400">{insight.title}</span>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                          {insight.priority}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-400 leading-relaxed">{insight.desc}</p>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-xs text-slate-500 py-4 col-span-3 text-center">
+                    Veri birikimi devam ediyor...
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ============================================================ */}
+        {/* SEKME 3: ENTEGRE PLAYBOOK & OPERASYONEL REHBER */}
         {/* ============================================================ */}
         {activeAdminTab === 'playbook' && (
           <div className="space-y-8 max-w-5xl mx-auto">

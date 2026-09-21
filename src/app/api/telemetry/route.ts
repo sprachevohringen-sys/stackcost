@@ -1,115 +1,59 @@
 import { NextResponse } from 'next/server';
-
-interface StoredEvent {
-  id: string;
-  type: string;
-  timestamp: number;
-  referrer: string;
-  metadata: Record<string, any>;
-}
-
-// In-memory telemetry cache (preserves live session data)
-const globalEvents: StoredEvent[] = [
-  // Seed with initial realistic benchmark data for preview
-  {
-    id: 'seed-1',
-    type: 'pageview',
-    timestamp: Date.now() - 1000 * 60 * 34,
-    referrer: 'https://reddit.com/r/SaaS',
-    metadata: { path: '/' },
-  },
-  {
-    id: 'seed-2',
-    type: 'model_calculated',
-    timestamp: Date.now() - 1000 * 60 * 22,
-    referrer: 'https://reddit.com/r/SaaS',
-    metadata: { model: 'GPT-4o (Omni)', monthlyCost: 1250, savings: 1040 },
-  },
-  {
-    id: 'seed-3',
-    type: 'affiliate_clicked',
-    timestamp: Date.now() - 1000 * 60 * 18,
-    referrer: 'https://reddit.com/r/SaaS',
-    metadata: { partnerId: 'togetherai', partnerName: 'Together AI', cta: 'Get $25 Free Tokens' },
-  },
-  {
-    id: 'seed-4',
-    type: 'cloud_calculated',
-    timestamp: Date.now() - 1000 * 60 * 9,
-    referrer: 'https://google.com',
-    metadata: { tier: 'Growth Scale', instanceCount: 3, awsCost: 350, doCost: 156 },
-  },
-  {
-    id: 'seed-5',
-    type: 'affiliate_clicked',
-    timestamp: Date.now() - 1000 * 60 * 5,
-    referrer: 'https://google.com',
-    metadata: { partnerId: 'digitalocean', partnerName: 'DigitalOcean', cta: 'Claim $200 Cloud Credit' },
-  },
-];
+import { saveEvent, computeDeepAnalytics, getStoredEvents } from '@/lib/telemetryStorage';
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const event: StoredEvent = {
-      id: Math.random().toString(36).substring(2, 9),
-      type: body.type || 'unknown',
-      timestamp: body.timestamp || Date.now(),
+
+    // Extract headers if available (country, user-agent)
+    const country = request.headers.get('x-vercel-ip-country') || 'US';
+    const userAgent = request.headers.get('user-agent') || '';
+    const device = /mobile/i.test(userAgent) ? 'mobile' : 'desktop';
+
+    const saved = saveEvent({
+      type: body.type || 'pageview',
+      sessionId: body.sessionId || 'anon_' + Math.random().toString(36).substring(2, 8),
+      country,
+      device,
       referrer: body.referrer || 'Direct',
       metadata: body.metadata || {},
-    };
+    });
 
-    globalEvents.unshift(event);
-    // Keep last 500 events
-    if (globalEvents.length > 500) {
-      globalEvents.pop();
-    }
-
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, eventId: saved.id });
   } catch (error) {
-    return NextResponse.json({ success: false, error: 'Invalid payload' }, { status: 400 });
+    console.error('Telemetry POST error:', error);
+    return NextResponse.json({ success: false, error: 'Failed storing event' }, { status: 500 });
   }
 }
 
-export async function GET() {
-  const totalPageviews = globalEvents.filter((e) => e.type === 'pageview').length;
-  const totalCalculations = globalEvents.filter(
-    (e) => e.type === 'model_calculated' || e.type === 'cloud_calculated' || e.type === 'gpu_calculated'
-  ).length;
-  const totalAffiliateClicks = globalEvents.filter((e) => e.type === 'affiliate_clicked').length;
+export async function GET(request: Request) {
+  try {
+    const url = new URL(request.url);
+    const mode = url.searchParams.get('mode');
 
-  // Breakdown of affiliate clicks by partner
-  const affiliateBreakdown: Record<string, number> = {};
-  globalEvents
-    .filter((e) => e.type === 'affiliate_clicked')
-    .forEach((e) => {
-      const name = e.metadata.partnerName || e.metadata.partnerId || 'Unknown';
-      affiliateBreakdown[name] = (affiliateBreakdown[name] || 0) + 1;
-    });
+    // If AI export mode is requested, return raw clean JSON for agent analysis
+    if (mode === 'ai-export') {
+      const allEvents = getStoredEvents();
+      const analytics = computeDeepAnalytics();
+      return NextResponse.json({
+        exportDate: new Date().toISOString(),
+        systemName: 'StackCost Intelligence',
+        totalEventsCount: allEvents.length,
+        summary: analytics.metrics,
+        funnel: analytics.funnel,
+        migrationFlows: analytics.migrationFlows,
+        topAffiliates: analytics.affiliateBreakdown,
+        referrers: analytics.referrerBreakdown,
+        countries: analytics.countryBreakdown,
+        aiGrowthRecommendations: analytics.strategicInsights,
+        rawEventsSample: allEvents.slice(0, 50),
+      });
+    }
 
-  // Breakdown of referrers
-  const referrerBreakdown: Record<string, number> = {};
-  globalEvents.forEach((e) => {
-    let source = 'Direct / Search';
-    if (e.referrer.includes('reddit')) source = 'Reddit';
-    else if (e.referrer.includes('google')) source = 'Google';
-    else if (e.referrer.includes('producthunt')) source = 'ProductHunt';
-    else if (e.referrer.includes('twitter') || e.referrer.includes('t.co')) source = 'X (Twitter)';
-    referrerBreakdown[source] = (referrerBreakdown[source] || 0) + 1;
-  });
-
-  // Conversion rate (Affiliate clicks / Total sessions)
-  const conversionRate = totalPageviews > 0 ? (totalAffiliateClicks / totalPageviews) * 100 : 0;
-
-  return NextResponse.json({
-    metrics: {
-      totalPageviews: Math.max(totalPageviews, 12),
-      totalCalculations: Math.max(totalCalculations, 8),
-      totalAffiliateClicks: Math.max(totalAffiliateClicks, 3),
-      conversionRate: conversionRate > 0 ? conversionRate.toFixed(1) : '18.5',
-    },
-    affiliateBreakdown,
-    referrerBreakdown,
-    recentEvents: globalEvents.slice(0, 25),
-  });
+    const analytics = computeDeepAnalytics();
+    return NextResponse.json(analytics);
+  } catch (error) {
+    console.error('Telemetry GET error:', error);
+    return NextResponse.json({ success: false, error: 'Failed computing analytics' }, { status: 500 });
+  }
 }
