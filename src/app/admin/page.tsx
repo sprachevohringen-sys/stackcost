@@ -91,6 +91,23 @@ interface RealtimeStreamItem {
   badgeColor: string;
 }
 
+interface ActiveVisitorItem {
+  sessionId: string;
+  displayId: string;
+  country: string;
+  countryCode: string;
+  flag: string;
+  city: string;
+  region: string;
+  activeSection: string;
+  path: string;
+  device: string;
+  os: string;
+  browser: string;
+  lastSeenMsAgo: number;
+  lastSeenFormatted: string;
+}
+
 interface TelemetryData {
   metrics: {
     totalPageviews: number;
@@ -111,6 +128,7 @@ interface TelemetryData {
     calculationRate: string;
     conversionRate: string;
   };
+  activeVisitors?: ActiveVisitorItem[];
   countries: CountryItem[];
   cities: CityItem[];
   devices: DeviceItem[];
@@ -594,11 +612,13 @@ export default function AdminDashboard() {
                       CANLI ZİYARETÇİ RADARI:
                     </span>
                     <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-mono text-xs font-bold border border-emerald-500/30">
-                      {data?.metrics.activeNow || 3} Aktif Ziyaretçi (Son 30 Dk)
+                      {data?.metrics.activeNow ?? 0} Aktif Ziyaretçi (Şu Anda Sitede)
                     </span>
                   </div>
                   <p className="text-xs text-slate-400 mt-0.5">
-                    En çok incelenen araç: <span className="text-emerald-300 font-medium">LLM API Token Tasarruf Hesaplayıcı (%57 İlgi)</span>
+                    {data?.metrics.activeNow && data.metrics.activeNow > 0 
+                      ? `${data.metrics.activeNow} kullanıcı şu anda sitenizde geziniyor.` 
+                      : 'Şu an aktif ziyaretçi yok. Sitenize biri girdiğinde saniyesinde burada görünecek.'}
                   </p>
                 </div>
               </div>
@@ -606,17 +626,90 @@ export default function AdminDashboard() {
               <div className="flex items-center gap-6 text-xs border-t md:border-t-0 border-slate-800 pt-3 md:pt-0">
                 <div>
                   <span className="text-slate-500 block text-[10px] uppercase font-semibold">Tekil Ziyaretçi</span>
-                  <span className="font-mono font-bold text-white text-sm">{data?.metrics.uniqueVisitors || 21} Kullanıcı</span>
+                  <span className="font-mono font-bold text-white text-sm">{data?.metrics.uniqueVisitors ?? 0} Kullanıcı</span>
                 </div>
                 <div>
                   <span className="text-slate-500 block text-[10px] uppercase font-semibold">Ort. Oturum Süresi</span>
-                  <span className="font-mono font-bold text-teal-400 text-sm">{data?.metrics.avgSessionDuration || '3dk 42sn'}</span>
+                  <span className="font-mono font-bold text-teal-400 text-sm">{data?.metrics.avgSessionDuration ?? '0sn'}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block text-[10px] uppercase font-semibold">Hemen Çıkma (Bounce)</span>
-                  <span className="font-mono font-bold text-sky-400 text-sm">{data?.metrics.bounceRate || '%24.8'}</span>
+                  <span className="text-slate-500 block text-[10px] uppercase font-semibold">Hemen Çıkma</span>
+                  <span className="font-mono font-bold text-sky-400 text-sm">{data?.metrics.bounceRate ?? '%0'}</span>
                 </div>
               </div>
+            </div>
+
+            {/* 1.1. CANLI AKTİF ZİYARETÇİLER (Şu Anda Sitede Olanlar ve Gezindikleri Sayfa) */}
+            <div className="p-5 sm:p-6 rounded-2xl bg-slate-900/80 border border-emerald-500/30 space-y-4 shadow-xl">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <span className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                  </span>
+                  <h3 className="text-sm font-bold text-white tracking-wide">
+                    Şu Anda Sitede Canlı Gezinenler ({data?.activeVisitors?.length || 0} Kişi)
+                  </h3>
+                </div>
+                <span className="text-[11px] text-slate-400 font-mono">
+                  Canlı Kalp Atışı (Heartbeat) ile 15 sn&apos;de bir güncellenir
+                </span>
+              </div>
+
+              {data?.activeVisitors && data.activeVisitors.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                  {data.activeVisitors.map((vis) => (
+                    <div
+                      key={vis.sessionId}
+                      className="p-4 rounded-xl bg-slate-950/90 border border-emerald-500/40 space-y-3 hover:border-emerald-500/70 transition-all shadow-md"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-2.5">
+                          <span className="text-2xl">{vis.flag}</span>
+                          <div>
+                            <span className="text-xs font-bold text-white block">
+                              {vis.city && vis.city !== 'Belirsiz' ? `${vis.city}, ` : ''}{vis.country}
+                            </span>
+                            <span className="text-[10px] text-slate-400 font-mono">
+                              {vis.displayId}
+                            </span>
+                          </div>
+                        </div>
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-mono font-semibold border border-emerald-500/20 shrink-0">
+                          {vis.lastSeenFormatted}
+                        </span>
+                      </div>
+
+                      <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800/80 space-y-1">
+                        <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">
+                          Şu An Baktığı Yer
+                        </span>
+                        <span className="text-xs font-semibold text-emerald-300 block truncate">
+                          📍 {vis.activeSection}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-800/60">
+                        <span className="flex items-center gap-1">
+                          <Laptop className="w-3 h-3 text-slate-500" />
+                          <span>{vis.device}</span>
+                        </span>
+                        <span>{vis.browser} / {vis.os}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="py-8 px-4 rounded-xl bg-slate-950/50 border border-slate-800/60 text-center space-y-2">
+                  <Radio className="w-6 h-6 text-slate-600 mx-auto animate-pulse" />
+                  <p className="text-xs font-semibold text-slate-300">
+                    Şu anda sitede canlı ziyaretçi bulunmuyor
+                  </p>
+                  <p className="text-[11px] text-slate-500 max-w-md mx-auto">
+                    Sitenize biri girdiğinde; hangi ülkeden/şehirden bağlandığı, hangi cihazı kullandığı ve o an hangi hesaplayıcıyı incelediği canlı olarak burada listelenecektir.
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* 2. 5 Büyük Metrik Kartı */}
@@ -627,11 +720,10 @@ export default function AdminDashboard() {
                   <Users className="w-4 h-4 text-emerald-400" />
                 </div>
                 <div className="text-3xl font-black text-white font-mono">
-                  {data?.metrics.totalPageviews || 28}
+                  {data?.metrics.totalPageviews ?? 0}
                 </div>
-                <span className="text-[11px] text-emerald-400 font-medium flex items-center gap-1">
-                  <TrendingUp className="w-3 h-3" />
-                  +14 bugün (Lansman)
+                <span className="text-[11px] text-slate-400">
+                  Gerçek sayfa ziyaretleri
                 </span>
               </div>
 
@@ -641,10 +733,10 @@ export default function AdminDashboard() {
                   <Calculator className="w-4 h-4 text-teal-400" />
                 </div>
                 <div className="text-3xl font-black text-white font-mono">
-                  {data?.metrics.totalCalculations || 19}
+                  {data?.metrics.totalCalculations ?? 0}
                 </div>
                 <span className="text-[11px] text-slate-400">
-                  Simüle edilen senaryolar
+                  Kullanıcı hesaplamaları
                 </span>
               </div>
 
@@ -654,10 +746,10 @@ export default function AdminDashboard() {
                   <MousePointerClick className="w-4 h-4 text-emerald-400" />
                 </div>
                 <div className="text-3xl font-black text-emerald-400 font-mono">
-                  {data?.metrics.totalAffiliateClicks || 6}
+                  {data?.metrics.totalAffiliateClicks ?? 0}
                 </div>
-                <span className="text-[11px] text-emerald-300 font-medium">
-                  Yönlendirilen müşteri
+                <span className="text-[11px] text-slate-400">
+                  Partner linklerine tıklayanlar
                 </span>
               </div>
 
@@ -667,7 +759,7 @@ export default function AdminDashboard() {
                   <BarChart3 className="w-4 h-4 text-sky-400" />
                 </div>
                 <div className="text-3xl font-black text-white font-mono">
-                  %{data?.metrics.conversionRate || '21.4'}
+                  %{data?.metrics.conversionRate ?? '0.0'}
                 </div>
                 <span className="text-[11px] text-slate-400">
                   Ziyaretçi başına tık
@@ -680,10 +772,10 @@ export default function AdminDashboard() {
                   <DollarSign className="w-4 h-4 text-emerald-400" />
                 </div>
                 <div className="text-2xl sm:text-3xl font-black text-emerald-400 font-mono">
-                  ${(data?.metrics.totalSimulatedAnnualSavings || 58420).toLocaleString('en-US')}
+                  ${(data?.metrics.totalSimulatedAnnualSavings ?? 0).toLocaleString('en-US')}
                 </div>
                 <span className="text-[11px] text-slate-400">
-                  Yıllık tasarruf arayışı
+                  Hesaplanan toplam tasarruf
                 </span>
               </div>
             </div>
@@ -748,10 +840,10 @@ export default function AdminDashboard() {
                 <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
                   <span className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                    Tier-1 Ülke Yoğunluğu: <strong className="text-white font-mono">%89</strong>
+                    <span>Küresel Erişim: <strong className="text-white font-mono">{data?.countries?.length || 0} Farklı Ülke</strong></span>
                   </span>
                   <span className="text-[11px] text-slate-500">
-                    ABD, İngiltere ve AB ülkeleri en yüksek bulut komisyonunu kazandırır.
+                    Gelen tüm ziyaretçilerin gerçek coğrafi IP konumları listelenir.
                   </span>
                 </div>
               </div>
@@ -761,7 +853,7 @@ export default function AdminDashboard() {
                 <div className="flex items-center justify-between border-b border-slate-800 pb-3">
                   <h3 className="text-sm font-bold text-white flex items-center gap-2">
                     <MapPin className="w-4 h-4 text-teal-400" />
-                    <span>Şehir & Teknoloji Merkezleri (Tech Hubs)</span>
+                    <span>Şehir & Teknoloji Merkezleri</span>
                   </h3>
                   <span className="text-xs text-slate-500">Bölgesel Odak</span>
                 </div>
@@ -792,7 +884,7 @@ export default function AdminDashboard() {
                     ))
                   ) : (
                     <div className="text-xs text-slate-500 py-6 text-center">
-                      Şehir verileri yükleniyor...
+                      Henüz şehir kaydı oluşmadı.
                     </div>
                   )}
                 </div>
@@ -813,23 +905,29 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="space-y-3">
-                  {data?.devices?.map((dev) => (
-                    <div key={dev.name} className="space-y-1">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="font-semibold text-slate-300 flex items-center gap-2">
-                          {dev.icon === 'Laptop' ? <Laptop className="w-3.5 h-3.5 text-sky-400" /> : <Smartphone className="w-3.5 h-3.5 text-teal-400" />}
-                          {dev.name}
-                        </span>
-                        <span className="font-mono font-bold text-white">%{dev.percentage} ({dev.count})</span>
+                  {data?.devices && data.devices.length > 0 ? (
+                    data.devices.map((dev) => (
+                      <div key={dev.name} className="space-y-1">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="font-semibold text-slate-300 flex items-center gap-2">
+                            {dev.icon === 'Laptop' ? <Laptop className="w-3.5 h-3.5 text-sky-400" /> : <Smartphone className="w-3.5 h-3.5 text-teal-400" />}
+                            {dev.name}
+                          </span>
+                          <span className="font-mono font-bold text-white">%{dev.percentage} ({dev.count})</span>
+                        </div>
+                        <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                          <div className="h-full bg-sky-500 rounded-full" style={{ width: `${dev.percentage}%` }} />
+                        </div>
                       </div>
-                      <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                        <div className="h-full bg-sky-500 rounded-full" style={{ width: `${dev.percentage}%` }} />
-                      </div>
+                    ))
+                  ) : (
+                    <div className="text-xs text-slate-500 py-6 text-center">
+                      Cihaz verisi bekleniyor...
                     </div>
-                  ))}
+                  )}
                 </div>
                 <p className="text-[11px] text-slate-500 pt-2 border-t border-slate-800/80">
-                  💡 %79 Masaüstü oranı, sitenin ofiste çalışan profesyonel yazılımcılar ve CTO'lar tarafından kullanıldığını gösterir.
+                  💡 Gerçek cihaz dağılımı: Ziyaretçilerin mobil ve masaüstü kullanımını yansıtır.
                 </p>
               </div>
 
@@ -844,20 +942,26 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="space-y-3">
-                  {data?.operatingSystems?.map((os) => (
-                    <div key={os.name} className="space-y-1">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="font-semibold text-slate-300">{os.name}</span>
-                        <span className="font-mono font-bold text-teal-400">%{os.percentage}</span>
+                  {data?.operatingSystems && data.operatingSystems.length > 0 ? (
+                    data.operatingSystems.map((os) => (
+                      <div key={os.name} className="space-y-1">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="font-semibold text-slate-300">{os.name}</span>
+                          <span className="font-mono font-bold text-teal-400">%{os.percentage} ({os.count})</span>
+                        </div>
+                        <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                          <div className="h-full bg-teal-500 rounded-full" style={{ width: `${os.percentage}%` }} />
+                        </div>
                       </div>
-                      <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                        <div className="h-full bg-teal-500 rounded-full" style={{ width: `${os.percentage}%` }} />
-                      </div>
+                    ))
+                  ) : (
+                    <div className="text-xs text-slate-500 py-6 text-center">
+                      İşletim sistemi verisi bekleniyor...
                     </div>
-                  ))}
+                  )}
                 </div>
                 <p className="text-[11px] text-slate-500 pt-2 border-t border-slate-800/80">
-                  💡 macOS ve Linux toplamı %64; bu kitle yapay zeka mühendisleri ve bulut yöneticileridir.
+                  💡 Gerçek işletim sistemi dağılımı: Kullanıcıların cihaz profillerini gösterir.
                 </p>
               </div>
 
@@ -872,20 +976,26 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="space-y-3">
-                  {data?.browsers?.map((b) => (
-                    <div key={b.name} className="space-y-1">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="font-semibold text-slate-300">{b.name}</span>
-                        <span className="font-mono font-bold text-emerald-400">%{b.percentage}</span>
+                  {data?.browsers && data.browsers.length > 0 ? (
+                    data.browsers.map((b) => (
+                      <div key={b.name} className="space-y-1">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="font-semibold text-slate-300">{b.name}</span>
+                          <span className="font-mono font-bold text-emerald-400">%{b.percentage} ({b.count})</span>
+                        </div>
+                        <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                          <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${b.percentage}%` }} />
+                        </div>
                       </div>
-                      <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                        <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${b.percentage}%` }} />
-                      </div>
+                    ))
+                  ) : (
+                    <div className="text-xs text-slate-500 py-6 text-center">
+                      Tarayıcı verisi bekleniyor...
                     </div>
-                  ))}
+                  )}
                 </div>
                 <p className="text-[11px] text-slate-500 pt-2 border-t border-slate-800/80">
-                  💡 Arc Browser ve Chrome kullananlar modern yapay zeka araçlarını en hızlı tüketen kitleyi oluşturur.
+                  💡 Gerçek tarayıcı dağılımı: Ziyaretçilerin tercih ettiği yazılımlardır.
                 </p>
               </div>
             </div>
@@ -904,23 +1014,29 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="space-y-3">
-                  {data?.trafficSources?.map((src) => (
-                    <div key={src.name} className="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800/80 flex items-center justify-between">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-semibold text-slate-200">{src.name}</span>
-                          <span className="px-1.5 py-0.2 rounded bg-slate-800 text-[10px] text-teal-400 border border-slate-700">
-                            {src.badge}
-                          </span>
+                  {data?.trafficSources && data.trafficSources.length > 0 ? (
+                    data.trafficSources.map((src) => (
+                      <div key={src.name} className="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800/80 flex items-center justify-between">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-semibold text-slate-200">{src.name}</span>
+                            <span className="px-1.5 py-0.2 rounded bg-slate-800 text-[10px] text-teal-400 border border-slate-700">
+                              {src.badge}
+                            </span>
+                          </div>
+                          <span className="text-[11px] text-slate-500 block mt-0.5">{src.type}</span>
                         </div>
-                        <span className="text-[11px] text-slate-500 block mt-0.5">{src.type}</span>
+                        <div className="text-right">
+                          <span className="text-sm font-mono font-bold text-teal-400">{src.count} ziyaret</span>
+                          <span className="text-[10px] font-mono text-slate-500 block">%{src.percentage}</span>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <span className="text-sm font-mono font-bold text-teal-400">{src.count} ziyaret</span>
-                        <span className="text-[10px] font-mono text-slate-500 block">%{src.percentage}</span>
-                      </div>
+                    ))
+                  ) : (
+                    <div className="text-xs text-slate-500 py-6 text-center">
+                      Henüz trafik kaynağı kaydedilmedi.
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
 
@@ -975,49 +1091,56 @@ export default function AdminDashboard() {
                     Gerçek Zamanlı Canlı İşlem Günlüğü (Realtime Activity Stream)
                   </h3>
                 </div>
-                <span className="text-xs text-slate-500">Google Analytics'ten Daha Hızlı ve Şeffaf</span>
+                <span className="text-xs text-slate-500">Google Analytics&apos;ten Daha Hızlı ve Şeffaf</span>
               </div>
 
               <div className="space-y-3">
-                {data?.realtimeStream?.map((item) => (
-                  <div
-                    key={item.id}
-                    className="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-slate-700 transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-xl">{item.flag}</span>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-white">{item.city}</span>
-                          <span className="text-[10px] text-slate-500">• {item.timeAgo}</span>
-                          <span
-                            className={`px-1.5 py-0.2 rounded text-[10px] font-semibold border ${
-                              item.badgeColor === 'emerald'
-                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                                : item.badgeColor === 'sky'
-                                ? 'bg-sky-500/10 text-sky-400 border-sky-500/20'
-                                : item.badgeColor === 'teal'
-                                ? 'bg-teal-500/10 text-teal-400 border-teal-500/20'
-                                : item.badgeColor === 'indigo'
-                                ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
-                                : item.badgeColor === 'purple'
-                                ? 'bg-purple-500/10 text-purple-400 border-purple-500/20'
-                                : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                            }`}
-                          >
-                            {item.badge}
-                          </span>
+                {data?.realtimeStream && data.realtimeStream.length > 0 ? (
+                  data.realtimeStream.map((item) => (
+                    <div
+                      key={item.id}
+                      className="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-slate-700 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-xl">{item.flag}</span>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-white">{item.city}</span>
+                            <span className="text-[10px] text-slate-500">• {item.timeAgo}</span>
+                            <span
+                              className={`px-1.5 py-0.2 rounded text-[10px] font-semibold border ${
+                                item.badgeColor === 'emerald'
+                                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                                  : item.badgeColor === 'sky'
+                                  ? 'bg-sky-500/10 text-sky-400 border-sky-500/20'
+                                  : item.badgeColor === 'teal'
+                                  ? 'bg-teal-500/10 text-teal-400 border-teal-500/20'
+                                  : item.badgeColor === 'indigo'
+                                  ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
+                                  : item.badgeColor === 'purple'
+                                  ? 'bg-purple-500/10 text-purple-400 border-purple-500/20'
+                                  : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                              }`}
+                            >
+                              {item.badge}
+                            </span>
+                          </div>
+                          <span className="text-xs text-slate-300 block mt-0.5">{item.detail}</span>
                         </div>
-                        <span className="text-xs text-slate-300 block mt-0.5">{item.detail}</span>
+                      </div>
+
+                      <div className="text-left sm:text-right shrink-0">
+                        <span className="text-xs font-semibold text-emerald-400 block">{item.action}</span>
+                        <span className="text-[10px] text-slate-500">Doğrulanmış Olay</span>
                       </div>
                     </div>
-
-                    <div className="text-left sm:text-right shrink-0">
-                      <span className="text-xs font-semibold text-emerald-400 block">{item.action}</span>
-                      <span className="text-[10px] text-slate-500">Doğrulanmış Olay</span>
-                    </div>
+                  ))
+                ) : (
+                  <div className="text-xs text-slate-500 py-8 text-center space-y-1">
+                    <p className="text-slate-400 font-semibold">Henüz kaydedilmiş bir etkinlik yok</p>
+                    <p className="text-[11px] text-slate-600">Sitenizde yapılan sayfa görüntülemeleri, hesaplamalar ve komisyon tıklamaları burada saniyesi saniyesine listelenecektir.</p>
                   </div>
-                ))}
+                )}
               </div>
             </div>
 

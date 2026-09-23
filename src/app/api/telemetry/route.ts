@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server';
 import { saveEvent, computeDeepAnalytics, getStoredEvents } from '@/lib/telemetryStorage';
+import { isAuthenticatedAdmin } from '@/lib/adminAuth';
 
-function resolveLocationFromTimezone(tz: string): { country: string; city: string; region: string } {
+function resolveLocationFromTimezone(tz?: string): { country: string; city: string; region: string } {
+  if (!tz) return { country: 'TR', city: 'Yerel Ziyaretçi', region: '' };
+
   const map: Record<string, { country: string; city: string; region: string }> = {
     'America/Los_Angeles': { country: 'US', city: 'San Francisco', region: 'California' },
     'America/New_York': { country: 'US', city: 'New York', region: 'New York' },
@@ -23,7 +26,15 @@ function resolveLocationFromTimezone(tz: string): { country: string; city: strin
     'Australia/Sydney': { country: 'AU', city: 'Sydney', region: 'New South Wales' },
   };
 
-  return map[tz] || { country: 'US', city: 'San Francisco', region: 'California' };
+  if (map[tz]) return map[tz];
+
+  // Heuristic based on timezone prefix
+  if (tz.startsWith('Europe/Istanbul') || tz === 'Turkey') return { country: 'TR', city: 'Istanbul', region: 'Türkiye' };
+  if (tz.startsWith('America/')) return { country: 'US', city: tz.replace('America/', '').replace('_', ' '), region: 'ABD' };
+  if (tz.startsWith('Europe/')) return { country: 'DE', city: tz.replace('Europe/', '').replace('_', ' '), region: 'Avrupa' };
+  if (tz.startsWith('Asia/')) return { country: 'SG', city: tz.replace('Asia/', '').replace('_', ' '), region: 'Asya' };
+
+  return { country: 'TR', city: 'Yerel', region: '' };
 }
 
 export async function POST(request: Request) {
@@ -45,9 +56,9 @@ export async function POST(request: Request) {
       city = loc.city;
       region = loc.region;
     } else if (!country) {
-      country = 'US';
-      city = 'San Francisco';
-      region = 'California';
+      country = 'TR';
+      city = 'Yerel';
+      region = '';
     }
 
     // 2. Resolve Device, OS, Browser
@@ -80,8 +91,8 @@ export async function POST(request: Request) {
       type: body.type || 'pageview',
       sessionId: body.sessionId || 'anon_' + Math.random().toString(36).substring(2, 8),
       country,
-      city: city || 'San Francisco',
-      region: region || 'California',
+      city: city || 'Belirsiz',
+      region: region || '',
       device,
       os,
       browser,
@@ -98,33 +109,37 @@ export async function POST(request: Request) {
 
 export async function GET(request: Request) {
   try {
+    const isAuthed = await isAuthenticatedAdmin(request);
+    if (!isAuthed) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const url = new URL(request.url);
     const mode = url.searchParams.get('mode');
-
-    const analytics = computeDeepAnalytics();
 
     // If AI export mode is requested, return raw clean JSON for agent analysis
     if (mode === 'ai-export') {
       const allEvents = getStoredEvents();
+      const analytics = computeDeepAnalytics();
       return NextResponse.json({
         exportDate: new Date().toISOString(),
-        systemName: 'StackCost Intelligence & Analytics Hub',
+        systemName: 'StackCost Intelligence',
         totalEventsCount: allEvents.length,
         summary: analytics.metrics,
-        countries: analytics.countries,
-        cities: analytics.cities,
-        devices: analytics.devices,
-        operatingSystems: analytics.operatingSystems,
-        browsers: analytics.browsers,
         funnel: analytics.funnel,
+        activeVisitors: analytics.activeVisitors,
         migrationFlows: analytics.migrationFlows,
         topAffiliates: analytics.affiliateBreakdown,
         referrers: analytics.trafficSources,
-        aiGrowthRecommendations: analytics.strategicInsights,
+        countries: analytics.countries,
+        cities: analytics.cities,
+        devices: analytics.devices,
+        realtimeStream: analytics.realtimeStream,
         rawEventsSample: allEvents.slice(0, 50),
       });
     }
 
+    const analytics = computeDeepAnalytics();
     return NextResponse.json(analytics);
   } catch (error) {
     console.error('Telemetry GET error:', error);

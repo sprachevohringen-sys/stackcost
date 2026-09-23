@@ -8,15 +8,17 @@ import { GPUCalculator } from '@/components/GPUCalculator';
 import { DealGrid } from '@/components/DealGrid';
 import { SEOContent } from '@/components/SEOContent';
 import { Footer } from '@/components/Footer';
-import { trackEvent } from '@/lib/telemetry';
+import { trackEvent, startPresenceHeartbeat } from '@/lib/telemetry';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<'llm' | 'cloud' | 'gpu'>('llm');
 
   useEffect(() => {
-    // Fire privacy-safe pageview event on initial landing
     trackEvent('pageview', { tab: activeTab });
-  }, []);
+
+    const stopHeartbeat = startPresenceHeartbeat(() => activeTab);
+    return () => stopHeartbeat();
+  }, [activeTab]);
 
   const handleTabChange = (tab: 'llm' | 'cloud' | 'gpu') => {
     setActiveTab(tab);

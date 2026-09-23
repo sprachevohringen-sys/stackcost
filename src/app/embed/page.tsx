@@ -1,9 +1,15 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { LLMCalculator } from '@/components/LLMCalculator';
+import { trackEvent, startPresenceHeartbeat } from '@/lib/telemetry';
 
 export default function EmbedPage() {
+  useEffect(() => {
+    trackEvent('pageview', { path: '/embed', activeSection: 'embed' });
+    const stop = startPresenceHeartbeat(() => 'embed');
+    return () => stop();
+  }, []);
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 p-4 sm:p-6 font-sans">
       <div className="max-w-5xl mx-auto">

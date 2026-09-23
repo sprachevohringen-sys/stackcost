@@ -1,13 +1,13 @@
 'use client';
 
 export interface TelemetryEventPayload {
-  type: 'pageview' | 'calculation' | 'affiliate_click' | 'budget_summary_copied';
+  type: 'pageview' | 'calculation' | 'affiliate_click' | 'budget_summary_copied' | 'heartbeat';
   referrer?: string;
   metadata?: Record<string, any>;
 }
 
 // Generate or retrieve persistent anonymous session ID
-function getSessionId(): string {
+export function getSessionId(): string {
   if (typeof window === 'undefined') return 'server_session';
   try {
     let sid = sessionStorage.getItem('sc_session_id');
@@ -21,7 +21,7 @@ function getSessionId(): string {
   }
 }
 
-function getClientDetails() {
+export function getClientDetails() {
   if (typeof window === 'undefined') return {};
   const ua = navigator.userAgent;
   
@@ -47,7 +47,7 @@ function getClientDetails() {
     timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
   } catch {}
 
-  const language = navigator.language || 'en';
+  const language = navigator.language || 'tr';
   const screenResolution = `${window.screen?.width || window.innerWidth}x${window.screen?.height || window.innerHeight}`;
 
   return { device, os, browser, timezone, language, screenResolution };
@@ -63,7 +63,10 @@ export const trackEvent = (type: TelemetryEventPayload['type'], metadata?: Recor
     sessionId: getSessionId(),
     referrer: document.referrer || 'Doğrudan / Organik',
     ...clientInfo,
-    metadata: metadata || {},
+    metadata: {
+      path: window.location.pathname,
+      ...metadata,
+    },
   };
 
   try {
@@ -81,4 +84,24 @@ export const trackEvent = (type: TelemetryEventPayload['type'], metadata?: Recor
   } catch (err) {
     console.debug('Telemetry logging silently failed', err);
   }
+};
+
+// Start a lightweight presence heartbeat that pings every 25 seconds while tab is active
+export const startPresenceHeartbeat = (getActiveSection: () => string) => {
+  if (typeof window === 'undefined') return () => {};
+
+  const sendPing = () => {
+    if (document.visibilityState === 'visible') {
+      trackEvent('heartbeat', {
+        activeSection: getActiveSection(),
+        tab: getActiveSection(),
+      });
+    }
+  };
+
+  // Immediate initial heartbeat ping
+  sendPing();
+
+  const timer = setInterval(sendPing, 25000);
+  return () => clearInterval(timer);
 };
