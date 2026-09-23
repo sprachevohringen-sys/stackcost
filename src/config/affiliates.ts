@@ -18,7 +18,7 @@ export const AFFILIATE_CONFIG: Record<string, AffiliatePartner> = {
     description: 'Simple, scalable cloud computing with transparent pricing and 99.99% uptime.',
     badge: 'Staff Pick',
     dealHighlight: '$200 Free Credit for 60 Days',
-    referralUrl: 'https://m.do.co/c/stackcost', // Kullanıcı kendi referans linkini buraya girecek
+    referralUrl: 'https://m.do.co/c/4fc4e8aa3fc9', // Kullanıcının gerçek DigitalOcean referans linki
     ctaText: 'Claim $200 Cloud Credit',
     isFeatured: true,
   },
