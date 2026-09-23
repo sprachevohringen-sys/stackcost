@@ -67,9 +67,10 @@
       "owner": "USER",
       "ownerLabel": "Yönetici (Sen)",
       "frequency": "Tek Seferlik",
-      "status": "todo",
+      "status": "done",
+      "completedAt": "2026-09-23T13:40:00Z",
       "description": "Namecheap veya Porkbun üzerinden stackcost.co veya infracalc.com alan adını satın almak.",
-      "auditNotes": "Kullanıcı onayında bekleniyor."
+      "auditNotes": "Stratejik Karar: $0 maliyetle Vercel subdomain (stackcost-ashen.vercel.app) üzerinden başlatıldı. İlk komisyon yattıktan sonra özel domaine geçilecek."
     },
     {
       "id": "task-07",
@@ -78,9 +79,10 @@
       "owner": "ORTAK",
       "ownerLabel": "Sen + Yapay Zeka",
       "frequency": "Tek Seferlik",
-      "status": "todo",
+      "status": "done",
+      "completedAt": "2026-09-23T13:43:00Z",
       "description": "github.com ve vercel.com üyelikleri açılıp kodların Vercel'e 1 tıkla bağlanması.",
-      "auditNotes": "Sistem 0 TL sunucu maliyetiyle ömür boyu canlıda kalacak."
+      "auditNotes": "Başarıyla tamamlandı! Site Vercel Global Edge üzerinde canlıda: https://stackcost-ashen.vercel.app"
     },
     {
       "id": "task-08",
