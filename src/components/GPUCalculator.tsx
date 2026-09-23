@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { GPU_BENCHMARKS, GPUServer } from '@/data/cloudProviders';
 import { AFFILIATE_CONFIG } from '@/config/affiliates';
+import { trackEvent } from '@/lib/telemetry';
 import { Cpu, ExternalLink, Zap, ShieldCheck, ArrowRight } from 'lucide-react';
 
 export const GPUCalculator: React.FC = () => {
@@ -133,17 +134,25 @@ export const GPUCalculator: React.FC = () => {
               ${runpodMonthly.toLocaleString('en-US', { maximumFractionDigits: 0 })}
               <span className="text-sm font-normal text-slate-400"> / month</span>
             </div>
-            <div className="flex items-center justify-between pt-2 border-t border-emerald-500/20">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-emerald-500/20">
               <span className="text-xs font-bold text-emerald-300">
-                You save ${annualSavings.toLocaleString('en-US', { maximumFractionDigits: 0 })}/year ({selectedGpu.savingsPercent}% off)
+                You save ${annualSavings.toLocaleString('en-US', { maximumFractionDigits: 0 })}/year ({selectedGpu.savingsPercent}% off) • Deploy with $200 free credit
               </span>
               <a
-                href={AFFILIATE_CONFIG.runpod.referralUrl}
+                href={AFFILIATE_CONFIG.digitalocean.referralUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold transition-all shadow-md shadow-emerald-500/20"
+                onClick={() => {
+                  trackEvent('affiliate_click', {
+                    partnerId: 'digitalocean',
+                    partnerName: 'DigitalOcean',
+                    dealText: '$200 Free Credit for 60 Days',
+                    location: 'gpu_benchmark_card',
+                  });
+                }}
+                className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:brightness-110 text-slate-950 text-xs font-bold transition-all shadow-md shadow-emerald-500/20"
               >
-                <span>{AFFILIATE_CONFIG.runpod.ctaText}</span>
+                <span>Claim $200 Free GPU Credit</span>
                 <ExternalLink className="w-3.5 h-3.5" />
               </a>
             </div>

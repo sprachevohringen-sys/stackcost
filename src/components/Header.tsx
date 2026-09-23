@@ -1,7 +1,8 @@
 'use client';
 
-import React from 'react';
 import { Cpu, DollarSign, Sparkles, Server, Zap, ExternalLink } from 'lucide-react';
+import { AFFILIATE_CONFIG } from '@/config/affiliates';
+import { trackEvent } from '@/lib/telemetry';
 
 interface HeaderProps {
   activeTab: 'llm' | 'cloud' | 'gpu';
@@ -68,14 +69,18 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab }) => {
             </button>
           </nav>
 
-          {/* Quick CTA */}
+          {/* Quick CTA - DigitalOcean $200 Free Credit */}
           <div className="hidden md:flex items-center gap-3">
             <a
-              href="#free-credits"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-900 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/10 transition-colors"
+              href={AFFILIATE_CONFIG.digitalocean.referralUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackEvent('affiliate_click', { partnerId: 'digitalocean', location: 'header_top_badge' })}
+              className="inline-flex items-center gap-1.5 text-xs font-bold px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 hover:brightness-110 shadow-md shadow-emerald-500/20 transition-all"
             >
               <Zap className="w-3.5 h-3.5" />
-              <span>$500+ Free Credits</span>
+              <span>Claim $200 Free Credit</span>
+              <ExternalLink className="w-3 h-3" />
             </a>
           </div>
         </div>

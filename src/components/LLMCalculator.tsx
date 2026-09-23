@@ -300,34 +300,34 @@ Calculated via: https://stackcost.co`;
                       Recommended: Switch to {bestAlternative.model.name}
                     </h4>
                     <p className="text-xs text-slate-400">
-                      Drops your monthly bill to{' '}
+                      Drops bill to{' '}
                       <span className="text-emerald-400 font-mono font-semibold">
                         ${bestAlternative.cost.toLocaleString('en-US', { maximumFractionDigits: 2 })}/mo
                       </span>{' '}
-                      with comparable benchmark reasoning.
+                      • Run on DigitalOcean with $200 free compute credit.
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2 w-full sm:w-auto">
                   <a
-                    href={AFFILIATE_CONFIG.togetherai.referralUrl}
+                    href={AFFILIATE_CONFIG.digitalocean.referralUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => {
                       trackEvent('affiliate_click', {
-                        partnerId: 'togetherai',
-                        partnerName: 'Together AI',
-                        dealText: AFFILIATE_CONFIG.togetherai.dealHighlight,
+                        partnerId: 'digitalocean',
+                        partnerName: 'DigitalOcean',
+                        dealText: '$200 Free Credit for 60 Days',
                         location: 'llm_hero_banner',
                         sourceModel: selectedModel.name,
                         targetModel: bestAlternative.model.name,
                         annualSavings: bestAlternative.annualSavings,
                       });
                     }}
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold transition-all shadow-md shadow-emerald-500/20"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:brightness-110 text-slate-950 text-xs font-bold transition-all shadow-md shadow-emerald-500/20"
                   >
-                    <span>{AFFILIATE_CONFIG.togetherai.ctaText}</span>
+                    <span>Claim $200 Credit & Deploy</span>
                     <ExternalLink className="w-3.5 h-3.5" />
                   </a>
                 </div>
