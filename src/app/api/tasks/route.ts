@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { isAuthenticatedAdmin } from '@/lib/adminAuth';
 
 const TASKS_PATH = path.join(process.cwd(), 'src', 'data', 'audit_tasks.json');
 
@@ -24,7 +25,12 @@ function saveTasks(tasks: any[]) {
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const isAuthed = await isAuthenticatedAdmin(request);
+  if (!isAuthed) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const tasks = getTasks();
   const total = tasks.length;
   const completed = tasks.filter((t: any) => t.status === 'done').length;
@@ -43,6 +49,11 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const isAuthed = await isAuthenticatedAdmin(request);
+  if (!isAuthed) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const body = await request.json();
     const tasks = getTasks();
