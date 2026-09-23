@@ -20,7 +20,7 @@ export const LAUNCH_KIT: LaunchItem[] = [
 
 We noticed most startups overpay by 60–80% on AI inference and cloud compute simply because proprietary pricing models (OpenAI/Anthropic) are opaque and prompt caching savings are rarely benchmarked side-by-side.
 
-We built StackCost (https://stackcost.co) to solve this:
+We built StackCost (https://stackcost-ashen.vercel.app) to solve this:
 - Real-time token burn simulations across frontier models (GPT-4o, Claude 3.5 Sonnet) vs open-weights (DeepSeek V3, Llama 3.3).
 - Instant prompt caching discount calculations (up to 90% savings).
 - Serverless GPU vs API break-even matrix.
@@ -39,7 +39,7 @@ Zero sign-up required, 100% client-side calculation. Would love your feedback on
 Everyone talks about DeepSeek V3 being 95% cheaper than proprietary models, but how much does that actually translate to on production workloads with realistic prompt caching?
 
 We built a free interactive calculator that lets you simulate exact token ratios, request volume, and cache hit rates:
-👉 https://stackcost.co
+👉 https://stackcost-ashen.vercel.app
 
 Key finding from our benchmarks:
 - On a 1M token/day RAG workflow with 40% cache hit, DeepSeek V3 drops a monthly $1,420 GPT-4o bill down to ~$115.
@@ -59,7 +59,7 @@ No ads, no email capture. Feel free to use the "Copy Budget Summary" button to p
 A curated, vendor-neutral repository of real-world pricing benchmarks for LLMs, GPU instances, and Cloud VPS.
 
 ## 📊 Live Interactive Calculator
-👉 [Launch StackCost Interactive Calculator](https://stackcost.co)
+👉 [Launch StackCost Interactive Calculator](https://stackcost-ashen.vercel.app)
 
 ## 📌 Features
 - **LLM Pricing Matrix:** GPT-4o vs Claude 3.5 Sonnet vs DeepSeek V3/R1.
