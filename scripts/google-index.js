@@ -13,12 +13,12 @@ const fs = require('fs');
 const https = require('https');
 
 const SITE_URLS = [
-  'https://stackcost.co',
-  'https://stackcost.co/embed',
-  'https://stackcost.co#llm',
-  'https://stackcost.co#cloud',
-  'https://stackcost.co#gpu',
-  'https://stackcost.co#free-credits',
+  'https://stackcost-ashen.vercel.app',
+  'https://stackcost-ashen.vercel.app/embed',
+  'https://stackcost-ashen.vercel.app#llm',
+  'https://stackcost-ashen.vercel.app#cloud',
+  'https://stackcost-ashen.vercel.app#gpu',
+  'https://stackcost-ashen.vercel.app#free-credits',
 ];
 
 console.log('🚀 StackCost Google Hızlı İndeksleme Başlatılıyor...');
