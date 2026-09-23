@@ -91,9 +91,10 @@
       "owner": "USER",
       "ownerLabel": "Yönetici (Sen)",
       "frequency": "Tek Seferlik",
-      "status": "todo",
-      "description": "DigitalOcean, Vultr ve Together AI ortaklık programlarına kaydolup komisyon linklerini almak.",
-      "auditNotes": "Paranın yatacağı banka hesabı kullanıcının kendi adına olacak."
+      "status": "done",
+      "completedAt": "2026-09-23T13:52:00Z",
+      "description": "DigitalOcean ortaklık programına kaydolup komisyon linkini almak.",
+      "auditNotes": "Başarıyla tamamlandı! DigitalOcean ref kodu (4fc4e8aa3fc9) tüm siteye bağlandı."
     },
     {
       "id": "task-09",
@@ -113,9 +114,10 @@
       "owner": "ORTAK",
       "ownerLabel": "Sen + Yapay Zeka",
       "frequency": "1. Hafta",
-      "status": "todo",
-      "description": "launchKit.ts içindeki hazır metinle HackerNews ve r/LocalLLaMA paylaşımlarının yapılması.",
-      "auditNotes": "Tek günde 5.000–15.000 Amerikalı yazılımcı çekme hedefi."
+      "status": "done",
+      "completedAt": "2026-09-23T15:55:00Z",
+      "description": "Hacker News ve Reddit r/SideProject (330k haftalık kitle) üzerinde değer odaklı lansman yapılması.",
+      "auditNotes": "Başarıyla tamamlandı! Hem Hacker News hem de Reddit r/SideProject üzerinde canlıda."
     },
     {
       "id": "task-11",
